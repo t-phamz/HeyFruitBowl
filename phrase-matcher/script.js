@@ -13,9 +13,9 @@ var phrases = [
   'she sells seashells on the seashore'
 ];
 
-var phrasePara = document.querySelector('.phrase');
-var resultPara = document.querySelector('.result');
-var diagnosticPara = document.querySelector('.output');
+var phrasePara = document.querySelector('.phrase'); 
+var resultPara = document.querySelector('.result'); //right or wrong
+var diagnosticPara = document.querySelector('.output'); //input result
 
 var testBtn = document.querySelector('button');
 
