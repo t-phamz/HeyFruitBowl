@@ -45,7 +45,7 @@ function testSpeech() {
   phrasePara.textContent = phrase; //shows the picked phrase
   // resultPara.textContent = 'Right or wrong?'; //set resultpara to right or wrong
   // resultPara.style.background = 'rgba(0,0,0,0.2)'; //give color to right or wrong
-  diagnosticPara.textContent = '...diagnostic messages'; //shows the diagnostics (can't see it doe)
+  // diagnosticPara.textContent = '...diagnostic messages'; //shows the diagnostics (can't see it doe)
 
   //var grammar = '#JSGF V1.0; grammar phrase; public <phrase> = ' + phrase +';'; //!!!! her tilføje vores egen sætning
   var recognition = new SpeechRecognition(); // sets makes a new variable recognition into a SpeecRecognition class
@@ -83,6 +83,7 @@ function testSpeech() {
 
     console.log(typeof speechResult);
     console.log(speechResult);
+    console.log(diagnosticPara);
     console.log('Confidence: ' + event.results[0][0].confidence); //kan brug i en if statement. muligvis noget med hvis confidence er lav skal vi dobbelt tjekke
   }
 
