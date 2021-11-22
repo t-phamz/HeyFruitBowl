@@ -20,7 +20,7 @@ var testBtn = document.querySelector('button'); //start button
 //   return number;
 // }
 
-window.onload = testSpeech();
+// window.onload = testSpeech();
 
 // function startsys() {
 //   var initial_reg = new SpeechRecognition();
@@ -36,7 +36,7 @@ window.onload = testSpeech();
 // }
 
 function testSpeech() {
-  testBtn.disabled = false;
+  testBtn.diseled = false;
   testBtn.textContent = 'Test in progress';
   
   var phrase = phrases[0]; //pick a phrase fra array
@@ -110,11 +110,13 @@ function testSpeech() {
   recognition.onend = function(event) {
       //Fired when the speech recognition service has disconnected.
       console.log('SpeechRecognition.onend');
-      if (trigger == true) {
-        testBtn.click();
-        console.log("success");
-      }
-      testBtn.click();
+      // if (trigger == true) {
+      //   testBtn.click();
+      //   console.log("success");
+      // }
+      // testBtn.disabled = false;
+      // testBtn.click();
+    
   }
   
   recognition.onnomatch = function(event) {
