@@ -58,7 +58,7 @@ function testSpeech() {
 
   recognition.start();
 
-  var trigger = false;
+  // var trigger = false;
 
   recognition.onresult = function(event) {
     // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
@@ -73,13 +73,11 @@ function testSpeech() {
     diagnosticPara.textContent = 'Speech received: ' + speechResult + '.';
 
     if (speechResult.includes("frugtskål")) {
-      trigger = true;
-      console.log('trigger on ', trigger);
+      // trigger = true;
+      
       //start ny funktion som tæller frugter
-    } else {
-      trigger = false;
-      testBtn.click();
-    }
+    } 
+    console.log('trigger on ', trigger);
 
     console.log(typeof speechResult);
     console.log(speechResult);
@@ -112,10 +110,11 @@ function testSpeech() {
   recognition.onend = function(event) {
       //Fired when the speech recognition service has disconnected.
       console.log('SpeechRecognition.onend');
-      if (trigger == true) {
-        testBtn.click();
-        console.log("success");
-      }
+      // if (trigger == true) {
+      //   testBtn.click();
+      //   console.log("success");
+      // }
+      testBtn.click();
   }
   
   recognition.onnomatch = function(event) {
