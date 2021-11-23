@@ -37,7 +37,7 @@ var testBtn = document.querySelector('button'); //start button
 // }
 
 function testSpeech() {
-  testBtn.diseled = false;
+  testBtn.disabled = false;
   testBtn.textContent = 'Test in progress';
   
   var phrase = phrases[0]; //pick a phrase fra array
@@ -88,7 +88,7 @@ function testSpeech() {
 
   recognition.onspeechend = function() {
     recognition.stop();
-    testBtn.disabled = false;
+      testBtn.disabled = false;
     testBtn.textContent = 'Start new test';
   }
 
