@@ -1,6 +1,7 @@
-var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
-var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
-var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+// var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition || null;
+// var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+// var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
 
 var phrases = [
   'hey frugtskål',
@@ -49,9 +50,9 @@ function testSpeech() {
 
   //var grammar = '#JSGF V1.0; grammar phrase; public <phrase> = ' + phrase +';'; //!!!! her tilføje vores egen sætning
   var recognition = new SpeechRecognition(); // sets makes a new variable recognition into a SpeecRecognition class
-  var speechRecognitionList = new SpeechGrammarList(); //sets makes a new variable recognition into a SpeecRecognition class
+  // var speechRecognitionList = new SpeechGrammarList(); //sets makes a new variable recognition into a SpeecRecognition class
   //speechRecognitionList.addFromString(grammar, 1); //!! egen sætning bliver tilføjet til listen 
-  recognition.grammars = speechRecognitionList;
+  //recognition.grammars = speechRecognitionList;
   recognition.lang = 'da-DK'; 
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
@@ -110,12 +111,11 @@ function testSpeech() {
   recognition.onend = function(event) {
       //Fired when the speech recognition service has disconnected.
       console.log('SpeechRecognition.onend');
-      // if (trigger == true) {
-      //   testBtn.click();
-      //   console.log("success");
-      // }
-      // testBtn.disabled = false;
-      // testBtn.click();
+       if (trigger == true) {
+       testBtn.click();
+       console.log("success");
+      }
+      testBtn.click();
     
   }
   
@@ -146,3 +146,4 @@ function testSpeech() {
 }
 
 testBtn.addEventListener('click', testSpeech); //tilføje function til button. 
+
