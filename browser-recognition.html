@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Browser speech recognition</title>
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>
+    <!-- <header>
       <h1>Browser speech recognition</h1>
-    </header>
+    </header> -->
     <main>
       <button id="button">Start listening</button>
       <div id="result"></div>
@@ -18,59 +18,124 @@
         Your browser doesn't support Speech Recognition. Sorry.
       </p>
     </main>
-    <footer>
+    <!-- <footer>
       <p>Built with 🎙 by <a href="https://twitter.com/philnash">philnash</a></p>
-    </footer>
+    </footer> -->
     <script>
-      window.addEventListener("DOMContentLoaded", () => {
+      // window.addEventListener("DOMContentLoaded", () => {
+      //   const button = document.getElementById("button");
+      //   const result = document.getElementById("result");
+      //   // const main = document.getElementsByTagName("main")[0];
+      //   let listening = false;
+      //   const SpeechRecognition =
+      //     window.SpeechRecognition || window.webkitSpeechRecognition;
+      //   if (typeof SpeechRecognition !== "undefined") {
+      //     const recognition = new SpeechRecognition();
+
+      //     const stop = () => {
+      //       // main.classList.remove("speaking");
+      //       recognition.stop();
+      //       button.textContent = "Start listening";
+      //     };
+
+      //     const start = () => {
+      //       // main.classList.add("speaking");
+      //       recognition.start();
+      //       button.textContent = "Stop listening";
+      //     };
+
+      //     const onResult = event => {
+      //       result.innerHTML = "";
+      //       for (const res of event.results) {
+      //         const text = document.createTextNode(res[0].transcript);
+      //         const p = document.createElement("p");
+      //         if (res.isFinal) {
+      //           p.classList.add("final");
+      //         }
+      //         p.appendChild(text);
+      //         result.appendChild(p);
+      //       }
+      //     };
+      //     recognition.continuous = true;
+      //     recognition.interimResults = true;
+      //     recognition.lang = 'da-DK'; 
+      //     recognition.addEventListener("result", onResult);
+      //     button.addEventListener("click", event => {
+      //       listening ? stop() : start();
+      //       listening = !listening;
+      //     });
+      //   } else {
+      //     button.remove();
+      //     const message = document.getElementById("message");
+      //     message.removeAttribute("hidden");
+      //     message.setAttribute("aria-hidden", "false");
+      //   }
+
+      //   button.click();
+      // });
+      
+      
+      
+      window.onload = test();
+      function test(){
         const button = document.getElementById("button");
         const result = document.getElementById("result");
-        const main = document.getElementsByTagName("main")[0];
-        let listening = false;
         const SpeechRecognition =
           window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (typeof SpeechRecognition !== "undefined") {
-          const recognition = new SpeechRecognition();
+        const recognition = new SpeechRecognition();
+        console.log("test virker");
 
-          const stop = () => {
-            main.classList.remove("speaking");
-            recognition.stop();
-            button.textContent = "Start listening";
-          };
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+        recognition.lang = 'da-DK';
 
-          const start = () => {
-            main.classList.add("speaking");
-            recognition.start();
-            button.textContent = "Stop listening";
-          };
+        recognition.start();
 
-          const onResult = event => {
-            result.innerHTML = "";
-            for (const res of event.results) {
-              const text = document.createTextNode(res[0].transcript);
-              const p = document.createElement("p");
-              if (res.isFinal) {
-                p.classList.add("final");
-              }
-              p.appendChild(text);
-              result.appendChild(p);
+        // recognition.onresult = function(event) {
+        //   var speechResult = event.results[0].transcript;
+        //   result.textContent = speechResult;
+        //   console.log(speechResult);
+        //   console.log("result:......");
+        // }
+       const onResult = event => {
+          result.innerHTML = "";
+          for (const res of event.results) {
+            const text = document.createTextNode(res[0].transcript);
+            const p = document.createElement("p");
+            if (res.isFinal) {
+              p.classList.add("final");
+              console.log('Speech has stopped being detected');
+              
+              // button.click();
             }
-          };
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          recognition.addEventListener("result", onResult);
-          button.addEventListener("click", event => {
-            listening ? stop() : start();
-            listening = !listening;
-          });
-        } else {
-          button.remove();
-          const message = document.getElementById("message");
-          message.removeAttribute("hidden");
-          message.setAttribute("aria-hidden", "false");
+            p.appendChild(text);
+            result.appendChild(p);
+            
+          }
         }
-        button.click();
-      });
+        recognition.addEventListener("result", onResult);
+
+
+        recognition.onspeechend = function(){
+          recognition.stop();
+          console.log("on speech end");
+        }
+        
+        recognition.onsoundstart = function(){
+          console.log("on sound start");
+        }
+
+        recognition.onend = function (){
+          console.log("on End");
+          test();
+          // button.click();
+        }
+        // button.addEventListener('click', test);
+        // button.click();
+      }
+        
+      
+      
 
     </script>
   </body>
