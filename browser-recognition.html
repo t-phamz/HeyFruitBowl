@@ -92,10 +92,14 @@
             // utterThis.voice = voices[0]
             utterThis.voice = voices[index];
             synth.speak(utterThis);
-            console.log("Frugtskål burde snakke");
+            //console.log("Frugtskål burde snakke");
             repeat = true;
+            console.log(repeat);
+            
+            //if()addInput().....jeg har købt xxx, sammeligner med phrases
+            //
           }
-          speechResult = "";
+         // speechResult = "";
           console.log("Speech result:" + speechResult);
         }
         recognition.addEventListener("result", onResult);
