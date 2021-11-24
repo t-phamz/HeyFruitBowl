@@ -13,6 +13,7 @@
     </header> -->
     <main>
       <button id="button">Start listening</button>
+      <select id="voiceSelect"></select>
       <div id="result"></div>
       <p id="message" hidden aria-hidden="true">
         Your browser doesn't support Speech Recognition. Sorry.
@@ -21,62 +22,22 @@
     <!-- <footer>
       <p>Built with 🎙 by <a href="https://twitter.com/philnash">philnash</a></p>
     </footer> -->
-    <script>
-      // window.addEventListener("DOMContentLoaded", () => {
-      //   const button = document.getElementById("button");
-      //   const result = document.getElementById("result");
-      //   // const main = document.getElementsByTagName("main")[0];
-      //   let listening = false;
-      //   const SpeechRecognition =
-      //     window.SpeechRecognition || window.webkitSpeechRecognition;
-      //   if (typeof SpeechRecognition !== "undefined") {
-      //     const recognition = new SpeechRecognition();
-
-      //     const stop = () => {
-      //       // main.classList.remove("speaking");
-      //       recognition.stop();
-      //       button.textContent = "Start listening";
-      //     };
-
-      //     const start = () => {
-      //       // main.classList.add("speaking");
-      //       recognition.start();
-      //       button.textContent = "Stop listening";
-      //     };
-
-      //     const onResult = event => {
-      //       result.innerHTML = "";
-      //       for (const res of event.results) {
-      //         const text = document.createTextNode(res[0].transcript);
-      //         const p = document.createElement("p");
-      //         if (res.isFinal) {
-      //           p.classList.add("final");
-      //         }
-      //         p.appendChild(text);
-      //         result.appendChild(p);
-      //       }
-      //     };
-      //     recognition.continuous = true;
-      //     recognition.interimResults = true;
-      //     recognition.lang = 'da-DK'; 
-      //     recognition.addEventListener("result", onResult);
-      //     button.addEventListener("click", event => {
-      //       listening ? stop() : start();
-      //       listening = !listening;
-      //     });
-      //   } else {
-      //     button.remove();
-      //     const message = document.getElementById("message");
-      //     message.removeAttribute("hidden");
-      //     message.setAttribute("aria-hidden", "false");
-      //   }
-
-      //   button.click();
-      // });
-      
-      
-      
+    <script>   
       window.onload = test();
+
+      var phrases = [
+        'hey frugtskål',
+        '32 bananer'
+      ];
+
+      var synth = window.speechSynthesis;
+      var voices;
+      var utterThis;
+      var index;
+      var repeat;
+
+      populateVoiceList();
+      
       function test(){
         const button = document.getElementById("button");
         const result = document.getElementById("result");
@@ -97,7 +58,8 @@
         //   console.log(speechResult);
         //   console.log("result:......");
         // }
-       const onResult = event => {
+        var speechResult;
+        const onResult = event => {
           result.innerHTML = "";
           for (const res of event.results) {
             const text = document.createTextNode(res[0].transcript);
@@ -111,11 +73,34 @@
             p.appendChild(text);
             result.appendChild(p);
             
+            speechResult = event.results[0][0].transcript.toLowerCase();
+            console.log(speechResult, typeof speechResult);
+            // if (speechResult.includes("frugtskål")) {
+            //   console.log("SUCCESS");
+            //   //Tree 1 (user started) 
+            //   utterThis = new SpeechSynthesisUtterance("hvad kan jeg gøre for dig?");
+            //   synth.speak(utterThis);
+            // }
           }
+
+          if ((speechResult.includes("tak") || speechResult.includes("Tak") || speechResult.includes("tak.") || speechResult.includes("Tak.")) && repeat == false ) {
+            //console.log("SUCCESS");
+            //Tree 1 (user started) 
+            recognition.stop();
+            populateVoiceList();
+            utterThis = new SpeechSynthesisUtterance("hvad kan jeg gøre for dig?");
+            // utterThis.voice = voices[0]
+            utterThis.voice = voices[index];
+            synth.speak(utterThis);
+            console.log("Frugtskål burde snakke");
+            repeat = true;
+          }
+          speechResult = "";
+          console.log("Speech result:" + speechResult);
         }
         recognition.addEventListener("result", onResult);
 
-
+        
         recognition.onspeechend = function(){
           recognition.stop();
           console.log("on speech end");
@@ -127,14 +112,67 @@
 
         recognition.onend = function (){
           console.log("on End");
-          test();
+          repeat = false;
+          setTimeout(test, 1000);
+          //test();
           // button.click();
         }
         // button.addEventListener('click', test);
         // button.click();
       }
         
+      function populateVoiceList() {
+        if(typeof speechSynthesis === 'undefined') {
+          console.log("speechSynthesis === undefined");
+          return;
+        }
+
+        voices = speechSynthesis.getVoices();
+        
+        // for(var i = 0; i < voices.length; i++) {
+        //   var option = document.createElement('option');
+        //   option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+
+        //   if(voices[i].default) {
+        //     option.textContent += ' -- DEFAULT';
+        //   }
+
+        //   option.setAttribute('data-lang', voices[i].lang);
+        //   option.setAttribute('data-name', voices[i].name);
+        //   document.getElementById("voiceSelect").appendChild(option);
+        // }
+
+        for(var i = 0; i < voices.length; i++) {
+          var option = document.createElement('option');
+          option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+
+          // console.log(voices[i].lang, typeof voices[i].lang);
+
+          if (voices[i].lang == "da-DK" || voices[i].lang == "da_DK") {
+            option.setAttribute('data-lang', voices[i].lang);
+            option.setAttribute('data-name', voices[i].name);
+            document.getElementById("voiceSelect").appendChild(option);
+            // utterThis.voice = voices[i];
+            index = i;
+          }
+
+
+          // if(voices[i].default) {
+          //   option.textContent += ' -- DEFAULT';
+          // }
+
+          // option.setAttribute('data-lang', voices[i].lang);
+          // option.setAttribute('data-name', voices[i].name);
+          // document.getElementById("voiceSelect").appendChild(option);
+          // console.log(option, typeof option);
+        }
+      }
+
+
       
+      if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+      }
       
 
     </script>
