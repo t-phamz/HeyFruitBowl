@@ -19,10 +19,32 @@
         Your browser doesn't support Speech Recognition. Sorry.
       </p>
     </main>
-    <!-- <footer>
-      <p>Built with 🎙 by <a href="https://twitter.com/philnash">philnash</a></p>
-    </footer> -->
-    <script>   
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.2.2/firebase-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.2.2/firebase-database.js"></script>
+
+    <script>
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+      //tjek både frugter og og numoffruits før alle forloops
+      
+      const firebaseConfig = {
+        apiKey: "AIzaSyDGYa_Vr_XnknIdru_LlaYVP116yzxe97A",
+        authDomain: "frugtskaal.firebaseapp.com",
+        databaseURL: "https://frugtskaal-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "frugtskaal",
+        storageBucket: "frugtskaal.appspot.com",
+        messagingSenderId: "156136853129",
+        appId: "1:156136853129:web:19d39b4d516c5f351c0058",
+        measurementId: "G-ZFHZHTPQN5"
+      };
+      
+      firebase.initializeApp(firebaseConfig);
+
+      // Get a reference to the database service
+      var db = firebase.database();
+
+
       window.onload = test();
 
       var phrases = [
@@ -35,6 +57,11 @@
       var utterThis;
       var index;
       var repeat;
+      var trigger;
+      var hasTwoDate = false;
+      var noAnswer;
+      var chosenFruit;
+      var chosenNum;
 
       populateVoiceList();
       
@@ -46,18 +73,14 @@
         const recognition = new SpeechRecognition();
         console.log("test virker");
 
-        recognition.interimResults = true;
+        //recognition.interimResults = true;
+        recognition.interimResults = false;
+
         recognition.maxAlternatives = 1;
         recognition.lang = 'da-DK';
 
         recognition.start();
 
-        // recognition.onresult = function(event) {
-        //   var speechResult = event.results[0].transcript;
-        //   result.textContent = speechResult;
-        //   console.log(speechResult);
-        //   console.log("result:......");
-        // }
         var speechResult;
         const onResult = event => {
           result.innerHTML = "";
@@ -83,23 +106,192 @@
             // }
           }
 
-          if ((speechResult.includes("tak") || speechResult.includes("Tak") || speechResult.includes("tak.") || speechResult.includes("Tak.")) && repeat == false ) {
-            //console.log("SUCCESS");
-            //Tree 1 (user started) 
-            recognition.stop();
-            populateVoiceList();
-            utterThis = new SpeechSynthesisUtterance("hvad kan jeg gøre for dig?");
-            // utterThis.voice = voices[0]
-            utterThis.voice = voices[index];
-            synth.speak(utterThis);
-            //console.log("Frugtskål burde snakke");
-            repeat = true;
-            console.log(repeat);
-            
-            //if()addInput().....jeg har købt xxx, sammeligner med phrases
-            //
+          trigWordArrayInital = ['tak', 'Tak']
+          if(checkTrigWord(speechResult, trigWordArrayInital, "hvad kan jeg gøre for dig?")){
+            trigger = true;
           }
-         // speechResult = "";
+          console.log("trigger is: " + trigger);
+          trigWordArrayBuy = [' køb']
+          trigWordArrayTake = [ ' tog', ' tage']
+          trigWordArrayNG = ['ny', 'gammel', "gamle"]
+          //var hasTwoDate;
+          //var tagIsRepeat = false;
+         
+          //ÆNDRE TRUE TIL TRIGGER
+
+
+
+          if (true) {
+            var numOfFruits = speechResult.match(/ en| et| én|\d+/g);
+            var fruits = speechResult.match(/æble|banan|pære|appelsin|vindrue|vindue|mandarin|fersken|blomme/g);
+          
+            if (numOfFruits != null) {
+              numOfFruits.forEach(function(element, index) {
+                if (element == " et" || element == " en" || element == " én") {
+                  numOfFruits.splice(index, 1, "1");
+                }
+              })
+            }
+
+            if (fruits != null) {
+              fruits.forEach(function(element, index) {
+                if (element == "vindue") {
+                  fruits.splice(index, 1, "vindrue");
+                }
+              })
+            }
+            
+            console.log("number: ", numOfFruits, typeof numOfFruits);
+            console.log("fruits: ", fruits);
+            // console.log("du har købt: " + numOfFruits[0] + " " + fruits[0]);
+            
+            if (checkTrigWord(speechResult, trigWordArrayBuy, "Er det alt du har købt?")){
+
+              var expiryDateArr = {'æble': 5,'banan': 3,'pære': 3, 'appelsin': 5, 'vindrue': 3, 'mandarin': 5, 'fersken': 2, 'blomme': 3};
+              //set in i DB
+              for (let i = 0; i < fruits.length; i++) {
+                var date = new Date();
+                //console.log(fruits[i], typeof fruits[i], expiryDateArr[fruits[i]]);
+                var expiryDate = expiryDateArr[fruits[i]];
+                date.setDate(date.getDate() + expiryDate);
+
+                var dateStr = date.toISOString().slice(0, 10);
+
+                //console.log(expiryDate, date);
+                writeData(numOfFruits[i], fruits[i], dateStr);
+                console.log(date, typeof date);
+                console.log(dateStr, typeof date)
+              }
+
+              // const db = firebase.database();
+              function writeData(num, fruit, date) {
+                db.ref('tablet1/frugter/' + fruit + "/" + date).set({
+                  antal: num,
+                });
+              }
+
+            }
+            
+            // console.log("HasTwoDate: " + hasTwoDate);
+
+            if (checkTrigWord(speechResult, trigWordArrayTake, " ") && hasTwoDate == false) {
+              utterThis = new SpeechSynthesisUtterance("Okay, det er noteret");
+              utterThis.voice = voices[index];
+              synth.speak(utterThis);
+
+              for (let i = 0; i < fruits.length; i++) {
+                hasTwoDate = false;
+                db.ref().child("tablet1/frugter/" + fruits[i]).get().then((snapshot) => {
+                  if (Object.keys(snapshot.val()).length > 1){
+                    utterThis = new SpeechSynthesisUtterance("Har du taget en af de gamle " + fruits[i] + "er eller en af de nye " + fruits[i] + "er");
+                    utterThis.voice = voices[index];
+                    synth.speak(utterThis);
+                    hasTwoDate = true;
+                    chosenFruit = fruits;
+                    chosenNum = numOfFruits;
+                  }else{
+                    var currentAntal;
+                    snapshot.forEach(function(frugtSnapshot) {
+                      var date = frugtSnapshot.val();
+                      currentAntal = parseInt(date.antal);
+                    });
+                    
+                    db.ref('tablet1/frugter/' + fruits[i] + "/" + Object.keys(snapshot.val())).update({
+                      antal: currentAntal - parseInt(numOfFruits[i])
+                    });
+                  }
+                });
+              }
+
+            }
+
+
+            if (hasTwoDate && checkTrigWord(speechResult, trigWordArrayNG, "okay, tak")) {
+              //console.log("ny eller gammel?");
+              var nyDate;
+              var gamleDate;
+              var currentAntal;
+              for (let i = 0; i < chosenFruit.length; i++) {
+                db.ref().child("tablet1/frugter/" + chosenFruit[i]).get().then((snapshot) => {
+                  dates = Object.keys(snapshot.val()); //string array
+                  // console.log(dates, typeof dates);
+                  //console.log(dates[0], typeof dates[0]);
+                  //console.log(dates[0] > dates[1]); //false
+                  
+                  if (dates[0] < dates[1]) {
+                    gamleDate = dates[0];
+                    nyDate = dates[1];
+                    console.log("først er mindre end andet");
+                    console.log(gamleDate, nyDate);
+                  } else {
+                    gamleDate = dates[1];
+                    nyDate = dates[0];
+                    console.log("anden er mindre end første");
+                    console.log(gamleDate, nyDate);
+                  }
+
+                  if (speechResult.includes("ny")) {
+                    db.ref().child("tablet1/frugter/" + chosenFruit[i] + "/" + nyDate).get().then((snapshot) => {
+                      currentAntal = parseInt(Object.values(snapshot.val()));
+                      db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + nyDate).update({
+                        antal: currentAntal - parseInt(chosenNum[i])
+                      });
+                    });
+                    
+                  } else if (speechResult.includes("gamle") || speechResult.includes("gammel")) {
+                    db.ref().child("tablet1/frugter/" + chosenFruit[i] + "/" + gamleDate).get().then((snapshot) => {
+                      currentAntal = parseInt(Object.values(snapshot.val()));
+                      db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + gamleDate).update({
+                        antal: currentAntal - parseInt(chosenNum[i])
+                      });
+                    });
+                  }
+                });
+                
+              }
+              // if (speechResult.includes("ny")) {
+              //   console.log("ny er taget");
+              //   //
+              // } else if (speechResult.includes("gamle") || speechResult.includes("gammel")) {
+              //   console.log("gammel er taget");
+              //   //
+              // }
+              hasTwoDate = false;  
+              noAnswer = false;
+            } 
+
+            if (hasTwoDate && noAnswer) {
+              utterThis = new SpeechSynthesisUtterance("Du mangler at svare om det er den nye eller den gamle som er blevet taget");
+              utterThis.voice = voices[index];
+              synth.speak(utterThis);
+            }
+
+
+            noAnswer = true;
+            console.log("HasTwoDate should be true: " + hasTwoDate);
+          }
+
+
+          function checkTrigWord(speech, trigWordArray, utterance) {
+            var istriggered = false;
+            trigWordArray.forEach(function(element) {
+              if (speech.includes(element)) {
+                //console.log("Element: " , element);
+                //console.log("SUCCESS");
+                //Tree 1 (user started) 
+                recognition.stop();
+                populateVoiceList();
+                utterThis = new SpeechSynthesisUtterance(utterance);
+                // utterThis.voice = voices[0]
+                utterThis.voice = voices[index];
+                synth.speak(utterThis);
+                istriggered = true;
+              }
+              
+            })
+            return istriggered;
+          }
+          
           console.log("Speech result:" + speechResult);
         }
         recognition.addEventListener("result", onResult);
@@ -117,14 +309,12 @@
         recognition.onend = function (){
           console.log("on End");
           repeat = false;
-          setTimeout(test, 1000);
+          setTimeout(test, 500);
           //test();
-          // button.click();
         }
-        // button.addEventListener('click', test);
-        // button.click();
+
       }
-        
+
       function populateVoiceList() {
         if(typeof speechSynthesis === 'undefined') {
           console.log("speechSynthesis === undefined");
@@ -132,19 +322,6 @@
         }
 
         voices = speechSynthesis.getVoices();
-        
-        // for(var i = 0; i < voices.length; i++) {
-        //   var option = document.createElement('option');
-        //   option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
-
-        //   if(voices[i].default) {
-        //     option.textContent += ' -- DEFAULT';
-        //   }
-
-        //   option.setAttribute('data-lang', voices[i].lang);
-        //   option.setAttribute('data-name', voices[i].name);
-        //   document.getElementById("voiceSelect").appendChild(option);
-        // }
 
         for(var i = 0; i < voices.length; i++) {
           var option = document.createElement('option');
@@ -159,16 +336,6 @@
             // utterThis.voice = voices[i];
             index = i;
           }
-
-
-          // if(voices[i].default) {
-          //   option.textContent += ' -- DEFAULT';
-          // }
-
-          // option.setAttribute('data-lang', voices[i].lang);
-          // option.setAttribute('data-name', voices[i].name);
-          // document.getElementById("voiceSelect").appendChild(option);
-          // console.log(option, typeof option);
         }
       }
 
@@ -179,6 +346,10 @@
       }
       
 
+      
+
     </script>
+
+    
   </body>
 </html>
