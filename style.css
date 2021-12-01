@@ -14,6 +14,7 @@ body {
   flex-direction: column;
   padding-left: 1em;
   padding-right: 1em;
+  background-color: black;
 }
 h1 {
   text-align: center;
@@ -27,7 +28,7 @@ main {
   flex-grow: 2;
   justify-content: space-around;
   align-items: center;
-  background-color: #fff;
+  background-color: black;
   border-radius: 12px;
   margin-bottom: 2em;
   padding-top: 4em;
@@ -55,36 +56,21 @@ main.speaking {
   text-align: center;
 }
 #result .final {
-  color: #0d122b;
+  color: rgb(173, 173, 173);
   font-style: normal;
+  font-size: 15pt;
 }
-button {
-  font-size: 18px;
-  font-weight: 200;
-  padding: 1em;
-  width: 200px;
-  background: transparent;
-  border: 4px solid #f22f46;
-  border-radius: 4px;
-  transition: all 0.4s ease 0s;
-  cursor: pointer;
-  color: #f22f46;
-  margin-bottom: 4em;
+#responds {
+  color: white;
+  font-style: normal;
+  font-size: 20pt;
 }
-button:hover,
-button:focus {
-  background: #f22f46;
-  color: #fff;
-}
+
 
 a {
   color: #0d122b;
 }
 .error {
   color: #f22f46;
-  text-align: center;
-}
-footer {
-  border-top: 1px solid #0d122b;
   text-align: center;
 }

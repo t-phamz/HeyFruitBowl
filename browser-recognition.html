@@ -6,15 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Browser speech recognition</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   </head>
   <body>
     <!-- <header>
       <h1>Browser speech recognition</h1>
     </header> -->
     <main>
-      <button id="button">Start listening</button>
-      <select id="voiceSelect"></select>
-      <div id="result"></div>
+      <select id="voiceSelect" style="display: none;"></select>
+      <div id="result">
+      </div>
+      <p id="responds"></p>
       <p id="message" hidden aria-hidden="true">
         Your browser doesn't support Speech Recognition. Sorry.
       </p>
@@ -22,7 +24,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.2.2/firebase-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.2.2/firebase-database.js"></script>
-
+    
     <script>
       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
@@ -66,12 +68,13 @@
       populateVoiceList();
       
       function test(){
+        var hvadErDer = []
         const button = document.getElementById("button");
         const result = document.getElementById("result");
         const SpeechRecognition =
           window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
-        console.log("test virker");
+        console.log("test() starts");
 
         //recognition.interimResults = true;
         recognition.interimResults = false;
@@ -114,6 +117,7 @@
           trigWordArrayBuy = [' køb']
           trigWordArrayTake = [ ' tog', ' tage']
           trigWordArrayNG = ['ny', 'gammel', "gamle"]
+          trigWordArrayWhat = ["hvad har jeg", "hvad er der"]
           //var hasTwoDate;
           //var tagIsRepeat = false;
          
@@ -123,7 +127,7 @@
 
           if (true) {
             var numOfFruits = speechResult.match(/ en| et| én|\d+/g);
-            var fruits = speechResult.match(/æble|banan|pære|appelsin|vindrue|vindue|mandarin|fersken|blomme/g);
+            var fruits = speechResult.match(/æbl|banan|pær|appelsin|vindru|vindu|mandarin|fersken|blomm/g);
           
             if (numOfFruits != null) {
               numOfFruits.forEach(function(element, index) {
@@ -135,8 +139,8 @@
 
             if (fruits != null) {
               fruits.forEach(function(element, index) {
-                if (element == "vindue") {
-                  fruits.splice(index, 1, "vindrue");
+                if (element == "vindu") {
+                  fruits.splice(index, 1, "vindru");
                 }
               })
             }
@@ -147,7 +151,7 @@
             
             if (checkTrigWord(speechResult, trigWordArrayBuy, "Er det alt du har købt?")){
 
-              var expiryDateArr = {'æble': 5,'banan': 3,'pære': 3, 'appelsin': 5, 'vindrue': 3, 'mandarin': 5, 'fersken': 2, 'blomme': 3};
+              var expiryDateArr = {'æbl': 5,'banan': 3,'pær': 3, 'appelsin': 5, 'vindru': 3, 'mandarin': 5, 'fersken': 2, 'blomm': 3};
               //set in i DB
               for (let i = 0; i < fruits.length; i++) {
                 var date = new Date();
@@ -178,14 +182,17 @@
               utterThis = new SpeechSynthesisUtterance("Okay, det er noteret");
               utterThis.voice = voices[index];
               synth.speak(utterThis);
+              document.getElementById("responds").innerHTML = "Okay, det er noteret";
 
               for (let i = 0; i < fruits.length; i++) {
                 hasTwoDate = false;
                 db.ref().child("tablet1/frugter/" + fruits[i]).get().then((snapshot) => {
                   if (Object.keys(snapshot.val()).length > 1){
-                    utterThis = new SpeechSynthesisUtterance("Har du taget en af de gamle " + fruits[i] + "er eller en af de nye " + fruits[i] + "er");
+                    var utterance = "Har du taget en af de gamle " + fruits[i] + "er eller en af de nye " + fruits[i] + "er";
+                    utterThis = new SpeechSynthesisUtterance(utterance);
                     utterThis.voice = voices[index];
                     synth.speak(utterThis);
+                    document.getElementById("responds").innerHTML = utterance;
                     hasTwoDate = true;
                     chosenFruit = fruits;
                     chosenNum = numOfFruits;
@@ -199,10 +206,13 @@
                     db.ref('tablet1/frugter/' + fruits[i] + "/" + Object.keys(snapshot.val())).update({
                       antal: currentAntal - parseInt(numOfFruits[i])
                     });
+
+                    if (currentAntal <= parseInt(numOfFruits[i])) {
+                      db.ref('tablet1/frugter/' + fruits[i] + "/" + Object.keys(snapshot.val())).remove();
+                    }
                   }
                 });
               }
-
             }
 
 
@@ -214,7 +224,7 @@
               for (let i = 0; i < chosenFruit.length; i++) {
                 db.ref().child("tablet1/frugter/" + chosenFruit[i]).get().then((snapshot) => {
                   dates = Object.keys(snapshot.val()); //string array
-                  // console.log(dates, typeof dates);
+                  //console.log(dates, typeof dates);
                   //console.log(dates[0], typeof dates[0]);
                   //console.log(dates[0] > dates[1]); //false
                   
@@ -236,6 +246,9 @@
                       db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + nyDate).update({
                         antal: currentAntal - parseInt(chosenNum[i])
                       });
+                      if (currentAntal <= parseInt(chosenNum[i])) {
+                        db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + nyDate).remove();
+                      }
                     });
                     
                   } else if (speechResult.includes("gamle") || speechResult.includes("gammel")) {
@@ -244,6 +257,9 @@
                       db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + gamleDate).update({
                         antal: currentAntal - parseInt(chosenNum[i])
                       });
+                      if (currentAntal <= parseInt(chosenNum[i])) {
+                        db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + gamleDate).remove();
+                      }
                     });
                   }
                 });
@@ -261,14 +277,66 @@
             } 
 
             if (hasTwoDate && noAnswer) {
-              utterThis = new SpeechSynthesisUtterance("Du mangler at svare om det er den nye eller den gamle som er blevet taget");
+              var utterance = "Du mangler at svare om det er den nye eller den gamle som er blevet taget";
+              utterThis = new SpeechSynthesisUtterance(utterance);
               utterThis.voice = voices[index];
               synth.speak(utterThis);
+              document.getElementById("responds").innerHTML = utterance;
             }
 
 
             noAnswer = true;
             console.log("HasTwoDate should be true: " + hasTwoDate);
+
+            if (checkTrigWord(speechResult, trigWordArrayWhat, "")) {
+              var fruitWithNum = []
+              db.ref().child("tablet1/frugter").get().then((snapshot) => {
+                //snapshot of each fruit
+                // var totalAntal;
+
+                // console.log(snapshot.val());
+                var output;
+                var Arr = snapshot.val();
+                //console.log(Object.keys(Arr).length);
+
+                Object.keys(Arr).forEach(element => {
+                  //For each fruit
+                  var totalAntal = 0;
+                  db.ref().child("tablet1/frugter/" + element).get().then((snapshot) => {
+                    //snapshot get date
+                    
+                    // console.log("date: ", Object.keys(snapshot.val()));
+                    for (let i = 0; i < Object.keys(snapshot.val()).length; i++) {
+                      var dateArr = Object.keys(snapshot.val());
+                      var antal; 
+                      // var totalAntal = 0;
+                      db.ref().child("tablet1/frugter/" + element + "/" + dateArr[i]).get().then((snapshot) => {
+                      //snapshot get antal
+                                               
+                        antal = parseInt(Object.values(snapshot.val())[0]);
+                        totalAntal += antal;
+                        console.log(antal, totalAntal);
+                        fruitWithNum[element] = totalAntal;
+                        hvadErDer = fruitWithNum;
+                      });
+
+                    }
+
+                  });
+                    
+                });
+                // for (let i = 0; i < element.length; i++) {
+                //   db.ref().child("tablet1/frugter/" + chosenFruit[i]).get().then((snapshot) => {
+                //     dates = Object.keys(snapshot.val());
+                //   });
+                // }
+              });
+              // for (let index = 0; index < Object.keys(fruitArr).length; index++) {
+              //   const element = array[index];
+                
+              // }
+              console.log(hvadErDer);
+            }
           }
 
 
@@ -276,15 +344,12 @@
             var istriggered = false;
             trigWordArray.forEach(function(element) {
               if (speech.includes(element)) {
-                //console.log("Element: " , element);
-                //console.log("SUCCESS");
-                //Tree 1 (user started) 
                 recognition.stop();
                 populateVoiceList();
                 utterThis = new SpeechSynthesisUtterance(utterance);
-                // utterThis.voice = voices[0]
                 utterThis.voice = voices[index];
                 synth.speak(utterThis);
+                document.getElementById("responds").innerHTML = utterance;
                 istriggered = true;
               }
               
@@ -307,7 +372,7 @@
         }
 
         recognition.onend = function (){
-          console.log("on End");
+          console.log("on test() end");
           repeat = false;
           setTimeout(test, 500);
           //test();
