@@ -7,6 +7,8 @@
     <title>Browser speech recognition</title>
     <link rel="stylesheet" href="style.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css"/> -->
   </head>
   <body>
     <!-- <header>
@@ -18,8 +20,19 @@
       </div>
       <p id="responds"></p>
       <div id="frugtUI">
-
         <!-- <p> 1 🍎</p> -->
+      </div>
+
+      <select id="chosenTablet">
+        <option value="tablet1">tablet 1</option>
+        <option value="tablet2">tablet 2</option>
+      </select>
+
+      <div id="button">
+        <label class="switch">
+          <input type="checkbox">
+          <span class="slider round"></span>
+        </label>
       </div>
       <p id="message" hidden aria-hidden="true">
         Your browser doesn't support Speech Recognition. Sorry.
@@ -68,6 +81,8 @@
       var noAnswer;
       var chosenFruit;
       var chosenNum;
+      // var tabletNum; 
+      // var speechIndex = 1;
 
       populateVoiceList();
       
@@ -119,7 +134,7 @@
           }
           console.log("trigger is: " + trigger);
           trigWordArrayBuy = [' køb']
-          trigWordArrayTake = [ ' tog', ' tage']
+          trigWordArrayTake = [ ' tog', ' tage', ' spis']
           trigWordArrayNG = ['ny', 'gammel', "gamle"]
           trigWordArrayWhat = ["hvad har jeg", "hvad er der"]
           //var hasTwoDate;
@@ -173,7 +188,7 @@
 
               // const db = firebase.database();
               function writeData(num, fruit, date) {
-                db.ref('tablet1/frugter/' + fruit + "/" + date).set({
+                db.ref(document.getElementById('chosenTablet').value + '/frugter/' + fruit + "/" + date).set({
                   antal: num,
                 });
               }
@@ -190,7 +205,7 @@
 
               for (let i = 0; i < fruits.length; i++) {
                 hasTwoDate = false;
-                db.ref().child("tablet1/frugter/" + fruits[i]).get().then((snapshot) => {
+                db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + fruits[i]).get().then((snapshot) => {
                   if (Object.keys(snapshot.val()).length > 1){
                     var utterance = "Har du taget en af de gamle " + fruits[i] + "er eller en af de nye " + fruits[i] + "er";
                     utterThis = new SpeechSynthesisUtterance(utterance);
@@ -207,12 +222,12 @@
                       currentAntal = parseInt(date.antal);
                     });
                     
-                    db.ref('tablet1/frugter/' + fruits[i] + "/" + Object.keys(snapshot.val())).update({
+                    db.ref(document.getElementById('chosenTablet').value + '/frugter/' + fruits[i] + "/" + Object.keys(snapshot.val())).update({
                       antal: currentAntal - parseInt(numOfFruits[i])
                     });
 
                     if (currentAntal <= parseInt(numOfFruits[i])) {
-                      db.ref('tablet1/frugter/' + fruits[i] + "/" + Object.keys(snapshot.val())).remove();
+                      db.ref(document.getElementById('chosenTablet').value + '/frugter/' + fruits[i] + "/" + Object.keys(snapshot.val())).remove();
                     }
                   }
                 });
@@ -226,7 +241,7 @@
               var gamleDate;
               var currentAntal;
               for (let i = 0; i < chosenFruit.length; i++) {
-                db.ref().child("tablet1/frugter/" + chosenFruit[i]).get().then((snapshot) => {
+                db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + chosenFruit[i]).get().then((snapshot) => {
                   dates = Object.keys(snapshot.val()); //string array
                   //console.log(dates, typeof dates);
                   //console.log(dates[0], typeof dates[0]);
@@ -245,24 +260,24 @@
                   }
 
                   if (speechResult.includes("ny")) {
-                    db.ref().child("tablet1/frugter/" + chosenFruit[i] + "/" + nyDate).get().then((snapshot) => {
+                    db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + chosenFruit[i] + "/" + nyDate).get().then((snapshot) => {
                       currentAntal = parseInt(Object.values(snapshot.val()));
-                      db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + nyDate).update({
+                      db.ref(document.getElementById('chosenTablet').value + '/frugter/' + chosenFruit[i] + "/" + nyDate).update({
                         antal: currentAntal - parseInt(chosenNum[i])
                       });
                       if (currentAntal <= parseInt(chosenNum[i])) {
-                        db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + nyDate).remove();
+                        db.ref(document.getElementById('chosenTablet').value + '/frugter/' + chosenFruit[i] + "/" + nyDate).remove();
                       }
                     });
                     
                   } else if (speechResult.includes("gamle") || speechResult.includes("gammel")) {
-                    db.ref().child("tablet1/frugter/" + chosenFruit[i] + "/" + gamleDate).get().then((snapshot) => {
+                    db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + chosenFruit[i] + "/" + gamleDate).get().then((snapshot) => {
                       currentAntal = parseInt(Object.values(snapshot.val()));
-                      db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + gamleDate).update({
+                      db.ref(document.getElementById('chosenTablet').value + '/frugter/' + chosenFruit[i] + "/" + gamleDate).update({
                         antal: currentAntal - parseInt(chosenNum[i])
                       });
                       if (currentAntal <= parseInt(chosenNum[i])) {
-                        db.ref('tablet1/frugter/' + chosenFruit[i] + "/" + gamleDate).remove();
+                        db.ref(document.getElementById('chosenTablet').value + '/frugter/' + chosenFruit[i] + "/" + gamleDate).remove();
                       }
                     });
                   }
@@ -296,7 +311,7 @@
 
           setInterval(() => {
             var fruitWithNum = []
-              db.ref().child("tablet1/frugter").get().then((snapshot) => {
+              db.ref().child(document.getElementById('chosenTablet').value + "/frugter").get().then((snapshot) => {
                 //snapshot of each fruit
                 // var totalAntal;
 
@@ -308,15 +323,15 @@
                 Object.keys(Arr).forEach(element => {
                   //For each fruit
                   var totalAntal = 0;
-                  db.ref().child("tablet1/frugter/" + element).get().then((snapshot) => {
+                  db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + element).get().then((snapshot) => {
                     //snapshot get date
                     
                     // console.log("date: ", Object.keys(snapshot.val()));
                     for (let i = 0; i < Object.keys(snapshot.val()).length; i++) {
                       var dateArr = Object.keys(snapshot.val());
                       var antal; 
-                      // var totalAntal = 0;
-                      db.ref().child("tablet1/frugter/" + element + "/" + dateArr[i]).get().then((snapshot) => {
+
+                      db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + element + "/" + dateArr[i]).get().then((snapshot) => {
                       //snapshot get antal
                                                
                         antal = parseInt(Object.values(snapshot.val())[0]);
@@ -333,27 +348,19 @@
                 //function som viser UI 
                 var emojis = []
                 var totalNum = []
-                var fruitEmoji = {'æbl': '🍎','banan': '🍌','pær': '🍐', 'appelsin': '🟠', 'vindru': '🍇', 'mandarin': '🍊', 'fersken': '🍑', 'blomm': "<img src='https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png' height='45' width='45'>"};
+                var fruitEmoji = {'æbl': '🍎','banan': '🍌','pær': '🍐', 'appelsin': "<img src='https://cdn.pixabay.com/photo/2016/02/23/17/42/orange-1218158_1280.png' height='45' width='45'>", 'vindru': '🍇', 'mandarin': '🍊', 'fersken': '🍑', 'blomm': "<img src='https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png' height='45' width='45'>"};
                 for (let i = 0; i < Object.keys(hvadErDer).length; i++) {
-                  // var expiryDate = fruitEmoji[fruits[i]];
                   emojis[i] = fruitEmoji[Object.keys(hvadErDer)[i]];
                   totalNum[i] = Object.values(hvadErDer)[i];
-                  // https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png
+
                 }
                 
                 console.log(emojis, totalNum);
                 document.getElementById("frugtUI").innerHTML = "";
                 var space = " ";
-                // document.getElementById("frugtUI").innerHTML = "<img src='https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png' height='50' width='50'>";
                 document.getElementById("frugtUI").innerHTML += "<br>";
+                
                 for (let i = 0; i < emojis.length; i++) { 
-                  // if (totalNum[i] >= 10) {
-                  //   space = " ";
-                  //   console.log("space is small");
-                  // }else{
-                  //   space = "  ";
-                  //   console.log("space is big");
-                  // }
 
                   if (i == 3) {
                     document.getElementById("frugtUI").innerHTML += "<span>" + totalNum[i] + " " + emojis[i] + "</span>";
@@ -363,8 +370,6 @@
                   }                 
                   
                 }
-                
-                  
 
               }, 500)
 
@@ -381,6 +386,15 @@
                 synth.speak(utterThis);
                 document.getElementById("responds").innerHTML = utterance;
                 istriggered = true;
+
+                //log successful speech in DB
+                var currentDate = new Date();
+                var dateAndTime = currentDate.getFullYear()+'-'+(currentDate.getMonth()+1)+'-'+currentDate.getDate()+' '+currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
+                db.ref(document.getElementById('chosenTablet').value + '/successSpeech/' + dateAndTime).set({
+                  input: speech,
+                  triggerWord: element
+                });
+                // speechIndex ++;
               }
               
             })
