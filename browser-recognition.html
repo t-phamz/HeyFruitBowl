@@ -17,6 +17,10 @@
       <div id="result">
       </div>
       <p id="responds"></p>
+      <div id="frugtUI">
+
+        <!-- <p> 1 🍎</p> -->
+      </div>
       <p id="message" hidden aria-hidden="true">
         Your browser doesn't support Speech Recognition. Sorry.
       </p>
@@ -288,8 +292,10 @@
             noAnswer = true;
             console.log("HasTwoDate should be true: " + hasTwoDate);
 
-            if (checkTrigWord(speechResult, trigWordArrayWhat, "")) {
-              var fruitWithNum = []
+          }
+
+          setInterval(() => {
+            var fruitWithNum = []
               db.ref().child("tablet1/frugter").get().then((snapshot) => {
                 //snapshot of each fruit
                 // var totalAntal;
@@ -315,30 +321,54 @@
                                                
                         antal = parseInt(Object.values(snapshot.val())[0]);
                         totalAntal += antal;
-                        console.log(antal, totalAntal);
                         fruitWithNum[element] = totalAntal;
                         hvadErDer = fruitWithNum;
                       });
-
                     }
-
                   });
-                    
                 });
-                // for (let i = 0; i < element.length; i++) {
-                //   db.ref().child("tablet1/frugter/" + chosenFruit[i]).get().then((snapshot) => {
-                //     dates = Object.keys(snapshot.val());
-                //   });
-                // }
               });
-              // for (let index = 0; index < Object.keys(fruitArr).length; index++) {
-              //   const element = array[index];
+              setTimeout(() => {
+                console.log(hvadErDer, Object.keys(hvadErDer).length);
+                //function som viser UI 
+                var emojis = []
+                var totalNum = []
+                var fruitEmoji = {'æbl': '🍎','banan': '🍌','pær': '🍐', 'appelsin': '🟠', 'vindru': '🍇', 'mandarin': '🍊', 'fersken': '🍑', 'blomm': "<img src='https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png' height='45' width='45'>"};
+                for (let i = 0; i < Object.keys(hvadErDer).length; i++) {
+                  // var expiryDate = fruitEmoji[fruits[i]];
+                  emojis[i] = fruitEmoji[Object.keys(hvadErDer)[i]];
+                  totalNum[i] = Object.values(hvadErDer)[i];
+                  // https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png
+                }
                 
-              // }
-              console.log(hvadErDer);
-            }
-          }
+                console.log(emojis, totalNum);
+                document.getElementById("frugtUI").innerHTML = "";
+                var space = " ";
+                // document.getElementById("frugtUI").innerHTML = "<img src='https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png' height='50' width='50'>";
+                document.getElementById("frugtUI").innerHTML += "<br>";
+                for (let i = 0; i < emojis.length; i++) { 
+                  // if (totalNum[i] >= 10) {
+                  //   space = " ";
+                  //   console.log("space is small");
+                  // }else{
+                  //   space = "  ";
+                  //   console.log("space is big");
+                  // }
 
+                  if (i == 3) {
+                    document.getElementById("frugtUI").innerHTML += "<span>" + totalNum[i] + " " + emojis[i] + "</span>";
+                    document.getElementById("frugtUI").innerHTML += "<br><br><br>";
+                  }else{
+                    document.getElementById("frugtUI").innerHTML += "<span>" + totalNum[i] + " " + emojis[i] + "</span>";
+                  }                 
+                  
+                }
+                
+                  
+
+              }, 500)
+
+          }, 1000);
 
           function checkTrigWord(speech, trigWordArray, utterance) {
             var istriggered = false;

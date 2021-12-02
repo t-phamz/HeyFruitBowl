@@ -66,6 +66,22 @@ main.speaking {
   font-size: 20pt;
 }
 
+#frugtUI {
+  position: relative;
+  margin: auto;
+  width: auto;
+  margin-top: 40%;
+  /* border: 3px solid green; */
+  /* padding: 10px; */
+}
+
+#frugtUI span {
+  color: rgb(173, 173, 173);
+  font-style: normal;
+  font-size: 30pt;
+  text-align: left;
+  padding: 20pt 30pt;
+}
 
 a {
   color: #0d122b;
