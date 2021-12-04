@@ -67,7 +67,7 @@ main.speaking {
 }
 
 #frugtUI {
-  position: fixed;
+  position: absolute;
   width: 700px;
   height: 200px;
   top: 80%;
