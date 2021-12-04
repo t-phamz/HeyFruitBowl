@@ -219,23 +219,36 @@
                 }
                 console.log(minDateFruitEmoji);
                 document.getElementById("frugtSnak").innerHTML = "<p>" + minDateFruitEmoji + '💬 ' + "</p>";
+                
+                var currentDate = new Date;
+                var timeToDeath = new Date(minDate).getDate() - currentDate.getDate();
+                console.log("timeToDeath: ", timeToDeath);
+                
+                //2-2: utterance
+                
+                var utterance = "jeg er mister " + minDateFruit + " og jeg er ved at blive for gammel vil du ikke spise mig før jeg dør den.";
+                utterThis = new SpeechSynthesisUtterance(utterance);
+                utterThis.voice = voices[index];
+                utterThis.rate = 0.8;
+                synth.speak(utterThis);
+                document.getElementById("responds").innerHTML = utterance;
+                utterThis.onend = function(){
+                  finishedSpeaking = true;
+                  utterThis.rate = 1;
+                  console.log("UtterThis tree 2");
+                  // console.log("ind i taget function, both new and old", finishedSpeaking);
+                  // console.log("trigwordarray utterthis: ", utterThis);
+                }
 
-                  // for (let i = 0; i < Object.keys(hvadErDer).length; i++) {
-                  //   emojis[i] = fruitEmoji[Object.keys(hvadErDer)[i]];
-                  //   totalNum[i] = Object.values(hvadErDer)[i];
-
-                  // }
-
-                  //2-2: utterance
-
-              }, 500)
+              }, 1000)
               
                
-            }, Math.random() * (2000 - 1500) + 1500);
+            }, Math.random() * (300000 - 60000) + 60000);
           //Math.random() * (7200000 - 3600000) + 3600000)
           }
 
           //Tree 1 trigger = ishome + "hey frugtskaal"
+          // mangler trigger "ikke i tree 2" => Tree 1 og 2 må ikke køre på samme tid
           if (isHome) { 
             console.log(isHome);
             document.getElementById("responds").style.color = "white";
