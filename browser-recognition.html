@@ -198,16 +198,6 @@
               })
             }
 
-            // for (let i = 0; i < fruits.length; i++) {
-            //   db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + fruits[i]).get().then((snapshot) => {
-            //     if (Object.keys(snapshot.val()).length > 1){
-            //       hasOldAndNew = true;
-            //       console.log("hasOldandNew is set to true", hasOldAndNew);
-            //     }else{
-            //       hasOldAndNew = false;
-            //     }
-            //   });
-            // }
             
             console.log("number: ", numOfFruits, typeof numOfFruits);
             console.log("fruits: ", fruits);
@@ -246,54 +236,8 @@
             } else if (checkTrigWord(speechResult, trigWordArrayBuy, "Undskyld jeg hørte dig ikke ordentligt, prøv igen")) {
               
             }
-            
-            // console.log("HasTwoDate: " + hasTwoDate);
 
-            //for loop tjekker antal af den frugt du har sagt 
             
-            
-            // if (hasOldAndNew == true && fruits != undefined && numOfFruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, "Har du taget en af de gamle eller en af de nye") && hasTwoDate == false) {
-            //   // var utterance = "Har du taget en af de gamle " + fruits[i] + "er eller en af de nye " + fruits[i] + "er";
-            //   // utterThis = new SpeechSynthesisUtterance(utterance);
-            //   // utterThis.voice = voices[index];
-            //   // synth.speak(utterThis);
-            //   // document.getElementById("responds").innerHTML = utterance;
-            //   console.log("hasOldAndNew should be true", hasOldAndNew);
-            //   hasTwoDate = true;
-            //   chosenFruit = fruits;
-            //   chosenNum = numOfFruits;
-              
-            // } else if (fruits != undefined && numOfFruits != undefined &&  hasTwoDate == false && hasOldAndNew == false && checkTrigWord(speechResult, trigWordArrayTake, "Okay, tak")) {
-            //   // utterThis = new SpeechSynthesisUtterance("Okay, det er noteret");
-            //   // utterThis.voice = voices[index];
-            //   // synth.speak(utterThis);
-            //   // document.getElementById("responds").innerHTML = "Okay, det er noteret";
-            //   console.log("hasoldandnew should be false: ", hasOldAndNew);
-            //   db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + fruits[0]).get().then((snapshot) => {
-            //     var currentAntal;
-            //     snapshot.forEach(function(frugtSnapshot) {
-            //       var date = frugtSnapshot.val();
-            //       currentAntal = parseInt(date.antal);
-            //     });
-
-            //     db.ref(document.getElementById('chosenTablet').value + '/frugter/' + fruits[0] + "/" + Object.keys(snapshot.val())).update({
-            //       antal: currentAntal - parseInt(numOfFruits[0])
-            //     });
-            //   });
-
-            //   if (currentAntal <= parseInt(numOfFruits[0])) {
-            //     db.ref(document.getElementById('chosenTablet').value + '/frugter/' + fruits[0] + "/" + Object.keys(snapshot.val())).remove();
-            //   }
-            // } else if (fruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, "Jeg hørte ikke hvor mange frugter du tog, prøv igen") && hasTwoDate == false) {
-              
-            // } else if (numOfFruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, "Jeg hørte ikke hvilke frugter du tog, prøv igen") && hasTwoDate == false) {
-              
-            // } else if(checkTrigWord(speechResult, trigWordArrayTake, "Undskyld jeg hørte dig ikke ordentligt, prøv igen")) {
-
-            // }
-            
-            
- 
 
             if (fruits != undefined && numOfFruits != undefined && checkTrigWordTake(speechResult, trigWordArrayTake) && hasTwoDate == false) {
 
@@ -403,19 +347,19 @@
               noAnswer = false;
             } 
 
-            // if (hasTwoDate && noAnswer) {
-            //   var utterance = "Du mangler at svare om det er den nye eller den gamle som er blevet taget";
-            //   utterThis = new SpeechSynthesisUtterance(utterance);
-            //   utterThis.voice = voices[index];
-            //   synth.speak(utterThis);
-            //   document.getElementById("responds").innerHTML = utterance;
-            // }
-
+            if (hasTwoDate && noAnswer) {
+              var utterance = "Du mangler at svare om det er den nye eller den gamle som er blevet taget";
+              utterThis = new SpeechSynthesisUtterance(utterance);
+              utterThis.voice = voices[index];
+              synth.speak(utterThis);
+              document.getElementById("responds").innerHTML = utterance;
+              utterThis.onend = function(){
+                finishedSpeaking = true;
+              }
+            }
 
             noAnswer = true;
             console.log("HasTwoDate should be true: " + hasTwoDate);
-
-
           }
 
           setInterval(() => {
@@ -570,17 +514,7 @@
           }
         }
 
-        // function checkhasOldAndNew() {
-        //   if(hasOldAndNew === undefined) {
-        //     window.setTimeout(checkFlag, 100); /* this checks the flag every 100 milliseconds*/
-        //   } else {
-        //     hasOldAndNew = false;
-        //     jegHarTaget();
-        //   }
-        // }
-          
-
-
+        
         recognition.onend = function (){
           //console.log(utterThis);
           console.log("inside onend now");
