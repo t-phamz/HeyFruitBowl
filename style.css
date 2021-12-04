@@ -70,7 +70,7 @@ main.speaking {
   position: absolute;
   width: 700px;
   height: 200px;
-  top: 80%;
+  top: 90%;
   left: 50%;
   margin-top: -100px;
   margin-left: -350px;
@@ -120,7 +120,7 @@ h1 {
   font-size: 100pt;
 }
 
-#frugtsnak {
+#frugtSnak {
   position: absolute;
   width: 700px;
   height: 200px;
