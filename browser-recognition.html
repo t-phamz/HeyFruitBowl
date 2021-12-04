@@ -20,6 +20,9 @@
       <div id="result">
       </div>
       <p id="responds"></p>
+
+      <div id="frugtSnak"></div>
+      
       <div id="frugtUI">  
         <!-- <p> 1 🍎</p> -->
       </div>
@@ -29,12 +32,6 @@
         <option value="tablet2">tablet 2</option>
       </select>
 
-      <!-- <div id="button">
-        <label class="switch">
-          <input type="checkbox">
-          <span class="slider round"></span>
-        </label>
-      </div> -->
       <p id="message" hidden aria-hidden="true">
         Your browser doesn't support Speech Recognition. Sorry.
       </p>
@@ -155,8 +152,90 @@
           trigWordArrayWhat = ["hvad har jeg", "hvad er der"]
 
          
-          //ÆNDRE TRUE TIL TRIGGER
+          
+          //tree 2 trigger = ishome, setinterval....
+          if (isHome) {
+            setInterval(() => {
+              
+              //step 1: get data fra DB, tjek hvilken frugt er mest tæt på expired date
+              var closestExpiryDate;
+              var frugter;
+              var datoArr = []
 
+              db.ref().child(document.getElementById('chosenTablet').value + "/frugter").get().then((snapshot) => {
+                //snapshot of each fruit
+                var Arr = snapshot.val();
+
+                Object.keys(Arr).forEach(element => {
+                  //For each fruit
+                  
+                  db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + element).get().then((snapshot) => {
+                    //snapshot get date
+                    var dates = Object.keys(snapshot.val()) // string array af alle date i en bestem frugt
+                    //closestExpiryDate = the nearest expirydate
+                    if (dates.length == 2) {
+                      if (dates[0] < dates[1]) {
+
+                        closestExpiryDate = dates[0];
+                      } else {
+                        closestExpiryDate = dates[1];
+                      }
+                    } else if (dates.length == 1) {
+                      closestExpiryDate = dates[0];
+                    }
+                    datoArr[element] = closestExpiryDate;
+                    //console.log(datoArr);
+
+                  });
+                  
+                });
+              });
+              
+              // for at få array ud, brug settimeout (...,500), se linje 400 til 420
+              setTimeout(() => {
+                var minDate;
+                var minDateFruit;
+                Object.keys(datoArr).forEach(element => {
+                  //console.log(element, datoArr[element]);
+                  if (minDate == null) {
+                    minDate = datoArr[element];
+                    minDateFruit = element;
+                  }else if (minDate > datoArr[element]) {
+                    minDate = datoArr[element];
+                    minDateFruit = element;
+                  }
+                });
+                console.log(minDateFruit,": ", minDate);
+                
+                //step 2: vis frugt emoji og få den til at snakke
+                  //2-1: vis frugt emoji 
+                var minDateFruitEmoji;
+                var fruitEmoji = {'æbl': '🍎','banan': '🍌','pær': '🍐', 'appelsin': "<img src='https://cdn.pixabay.com/photo/2016/02/23/17/42/orange-1218158_1280.png' height='45' width='45'>", 'vindru': '🍇', 'mandarin': '🍊', 'fersken': '🍑', 'blomm': "<img src='https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png' height='45' width='45'>"};
+                for (let i = 0; i < Object.keys(fruitEmoji).length; i++) {
+                  
+                  if (Object.keys(fruitEmoji)[i] == minDateFruit) {
+                    minDateFruitEmoji = fruitEmoji[Object.keys(fruitEmoji)[i]];
+                  }
+                }
+                console.log(minDateFruitEmoji);
+                document.getElementById("frugtSnak").innerHTML = "<p>" + minDateFruitEmoji + '💬 ' + "</p>";
+
+                  // for (let i = 0; i < Object.keys(hvadErDer).length; i++) {
+                  //   emojis[i] = fruitEmoji[Object.keys(hvadErDer)[i]];
+                  //   totalNum[i] = Object.values(hvadErDer)[i];
+
+                  // }
+
+                  //2-2: utterance
+
+              }, 500)
+              
+               
+            }, Math.random() * (2000 - 1500) + 1500);
+          //Math.random() * (7200000 - 3600000) + 3600000)
+          }
+
+          //Tree 1 trigger = ishome + "hey frugtskaal"
           if (isHome) { 
             console.log(isHome);
             document.getElementById("responds").style.color = "white";
@@ -359,7 +438,8 @@
             }
 
             noAnswer = true;
-            console.log("HasTwoDate should be true: " + hasTwoDate);
+            //console.log("HasTwoDate should be true: " + hasTwoDate);
+            
           }
 
           setInterval(() => {
