@@ -70,7 +70,7 @@
       var synth = window.speechSynthesis;
       var voices;
       
-      var utterThis;
+      var utterThis = null;
       //var isFinishSpeaking;
       //utterThis.onend = function(){ isFinishSpeaking = true}
 
@@ -81,12 +81,13 @@
       var chosenFruit;
       var chosenNum;
       var isHome = false;
+      var finishedSpeaking = false;
+      var hasOldAndNew;
 
 
       //document.body.addEventListener("touchend", isHomeOrNot());
       document.body.addEventListener("click", () => isHomeOrNot());
-      //ocument.body.addEventListener("click", () => alertTest());
-      
+
       function isHomeOrNot() {
         isHome = isHome ? false : true; 
         console.log("is home? ", isHome);
@@ -159,9 +160,10 @@
           if (isHome) { 
             console.log(isHome);
             document.getElementById("responds").style.color = "white";
+            document.getElementById("responds").innerHTML = "";
             var numOfFruits = speechResult.match(/ en | et | én | to | tre | fire | fem | seks | syv | otte | ni | ti |\d+/g);
             var fruits = speechResult.match(/æbl|banan|pær|appelsin|vindru|vindu|mandarin|fersken|blomm/g);
-          
+            
             if (numOfFruits != undefined) {
               numOfFruits.forEach(function(element, index) {
                 if (element == " et " || element == " en " || element == " én ") {
@@ -195,10 +197,22 @@
                 }
               })
             }
+
+            // for (let i = 0; i < fruits.length; i++) {
+            //   db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + fruits[i]).get().then((snapshot) => {
+            //     if (Object.keys(snapshot.val()).length > 1){
+            //       hasOldAndNew = true;
+            //       console.log("hasOldandNew is set to true", hasOldAndNew);
+            //     }else{
+            //       hasOldAndNew = false;
+            //     }
+            //   });
+            // }
             
             console.log("number: ", numOfFruits, typeof numOfFruits);
             console.log("fruits: ", fruits);
             // console.log("du har købt: " + numOfFruits[0] + " " + fruits[0]);
+            
             
             if (fruits != undefined && numOfFruits != undefined && checkTrigWord(speechResult, trigWordArrayBuy, "Er det alt du har købt?")){
 
@@ -235,15 +249,57 @@
             
             // console.log("HasTwoDate: " + hasTwoDate);
 
-            if (fruits != undefined && numOfFruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, " ") && hasTwoDate == false) {
+            //for loop tjekker antal af den frugt du har sagt 
+            
+            
+            // if (hasOldAndNew == true && fruits != undefined && numOfFruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, "Har du taget en af de gamle eller en af de nye") && hasTwoDate == false) {
+            //   // var utterance = "Har du taget en af de gamle " + fruits[i] + "er eller en af de nye " + fruits[i] + "er";
+            //   // utterThis = new SpeechSynthesisUtterance(utterance);
+            //   // utterThis.voice = voices[index];
+            //   // synth.speak(utterThis);
+            //   // document.getElementById("responds").innerHTML = utterance;
+            //   console.log("hasOldAndNew should be true", hasOldAndNew);
+            //   hasTwoDate = true;
+            //   chosenFruit = fruits;
+            //   chosenNum = numOfFruits;
               
-              // utterThis = new SpeechSynthesisUtterance("Okay, det er noteret");
-              // utterThis.voice = voices[index];
-              // synth.speak(utterThis);
-              // document.getElementById("responds").innerHTML = "Okay, det er noteret";
+            // } else if (fruits != undefined && numOfFruits != undefined &&  hasTwoDate == false && hasOldAndNew == false && checkTrigWord(speechResult, trigWordArrayTake, "Okay, tak")) {
+            //   // utterThis = new SpeechSynthesisUtterance("Okay, det er noteret");
+            //   // utterThis.voice = voices[index];
+            //   // synth.speak(utterThis);
+            //   // document.getElementById("responds").innerHTML = "Okay, det er noteret";
+            //   console.log("hasoldandnew should be false: ", hasOldAndNew);
+            //   db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + fruits[0]).get().then((snapshot) => {
+            //     var currentAntal;
+            //     snapshot.forEach(function(frugtSnapshot) {
+            //       var date = frugtSnapshot.val();
+            //       currentAntal = parseInt(date.antal);
+            //     });
+
+            //     db.ref(document.getElementById('chosenTablet').value + '/frugter/' + fruits[0] + "/" + Object.keys(snapshot.val())).update({
+            //       antal: currentAntal - parseInt(numOfFruits[0])
+            //     });
+            //   });
+
+            //   if (currentAntal <= parseInt(numOfFruits[0])) {
+            //     db.ref(document.getElementById('chosenTablet').value + '/frugter/' + fruits[0] + "/" + Object.keys(snapshot.val())).remove();
+            //   }
+            // } else if (fruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, "Jeg hørte ikke hvor mange frugter du tog, prøv igen") && hasTwoDate == false) {
+              
+            // } else if (numOfFruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, "Jeg hørte ikke hvilke frugter du tog, prøv igen") && hasTwoDate == false) {
+              
+            // } else if(checkTrigWord(speechResult, trigWordArrayTake, "Undskyld jeg hørte dig ikke ordentligt, prøv igen")) {
+
+            // }
+            
+            
+ 
+
+            if (fruits != undefined && numOfFruits != undefined && checkTrigWordTake(speechResult, trigWordArrayTake) && hasTwoDate == false) {
 
               for (let i = 0; i < fruits.length; i++) {
                 hasTwoDate = false;
+                utterThis = 1;
                 db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + fruits[i]).get().then((snapshot) => {
                   if (Object.keys(snapshot.val()).length > 1){
                     var utterance = "Har du taget en af de gamle " + fruits[i] + "er eller en af de nye " + fruits[i] + "er";
@@ -251,14 +307,26 @@
                     utterThis.voice = voices[index];
                     synth.speak(utterThis);
                     document.getElementById("responds").innerHTML = utterance;
+                    utterThis.onend = function(){
+                      finishedSpeaking = true;
+                      console.log("ind i taget function, both new and old", finishedSpeaking);
+                      console.log("trigwordarray utterthis: ", utterThis);
+                    }
+
                     hasTwoDate = true;
                     chosenFruit = fruits;
                     chosenNum = numOfFruits;
                   }else{
+                    var utterance = "Okay, tak";
                     utterThis = new SpeechSynthesisUtterance("Okay, det er noteret");
                     utterThis.voice = voices[index];
                     synth.speak(utterThis);
                     document.getElementById("responds").innerHTML = "Okay, det er noteret";
+                    utterThis.onend = function(){
+                      finishedSpeaking = true;
+                      console.log("ind i taget function, both new and old", finishedSpeaking);
+                    }
+
                     var currentAntal;
                     snapshot.forEach(function(frugtSnapshot) {
                       var date = frugtSnapshot.val();
@@ -335,20 +403,19 @@
               noAnswer = false;
             } 
 
-            if (hasTwoDate && noAnswer) {
-              var utterance = "Du mangler at svare om det er den nye eller den gamle som er blevet taget";
-              utterThis = new SpeechSynthesisUtterance(utterance);
-              utterThis.voice = voices[index];
-              synth.speak(utterThis);
-              document.getElementById("responds").innerHTML = utterance;
-            }
+            // if (hasTwoDate && noAnswer) {
+            //   var utterance = "Du mangler at svare om det er den nye eller den gamle som er blevet taget";
+            //   utterThis = new SpeechSynthesisUtterance(utterance);
+            //   utterThis.voice = voices[index];
+            //   synth.speak(utterThis);
+            //   document.getElementById("responds").innerHTML = utterance;
+            // }
 
 
             noAnswer = true;
             console.log("HasTwoDate should be true: " + hasTwoDate);
 
-          }else{
-            //test();
+
           }
 
           setInterval(() => {
@@ -426,8 +493,15 @@
                 utterThis = new SpeechSynthesisUtterance(utterance);
                 utterThis.voice = voices[index];
                 synth.speak(utterThis);
+
                 document.getElementById("responds").innerHTML = utterance;
                 //delay 
+
+                utterThis.onend = function(){
+                  //console.log("utterthis.onend", Object.values(utterThis.text));
+                  finishedSpeaking = true;              
+                  //test();
+                }
 
                 istriggered = true;
 
@@ -445,8 +519,35 @@
             return istriggered;
           }
           
+
+          function checkTrigWordTake(speech, trigWordArray) {
+            var istriggered = false;
+            trigWordArray.forEach(function(element) {
+              if (speech.includes(element)) {
+                recognition.stop();
+                istriggered = true;
+
+                //log successful speech in DB
+                var currentDate = new Date();
+                var dateAndTime = currentDate.getFullYear()+'-'+(currentDate.getMonth()+1)+'-'+currentDate.getDate()+' '+currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
+                db.ref(document.getElementById('chosenTablet').value + '/successSpeech/' + dateAndTime).set({
+                  input: speech,
+                  triggerWord: element
+                });
+                // speechIndex ++;
+              }
+              
+            })
+            return istriggered;
+          }
+
+          // if trigger slutter her
           console.log("Speech result:" + speechResult);
         }
+        
+
+        
+        
         recognition.addEventListener("result", onResult);
 
         
@@ -459,45 +560,40 @@
           console.log("on sound start");
         }
 
-        utterThis.onend = function(){
-              console.log("finished speaking");
-              console.log("on test() end");
-              test();
-            }
+        
+        function checkFlag() {
+          if(finishedSpeaking === false) {
+            window.setTimeout(checkFlag, 100); /* this checks the flag every 100 milliseconds*/
+          } else {
+            finishedSpeaking = false;
+            test()
+          }
+        }
+
+        // function checkhasOldAndNew() {
+        //   if(hasOldAndNew === undefined) {
+        //     window.setTimeout(checkFlag, 100); /* this checks the flag every 100 milliseconds*/
+        //   } else {
+        //     hasOldAndNew = false;
+        //     jegHarTaget();
+        //   }
+        // }
+          
 
 
         recognition.onend = function (){
           //console.log(utterThis);
           console.log("inside onend now");
           console.log(utterThis, isHome);
-          // if (utterThis != undefined || utterThis != null) {
-          //   // utterThis.onend = function(){
-          //   //   console.log("finished speaking");
-          //   //   console.log("on test() end");
-          //   //   test();
-          //   // }
-          // }else 
+          console.log("finishedSpeaking: ", finishedSpeaking);
+          
+          checkFlag();
+
           if(utterThis == undefined && (isHome == false || isHome == true) ){
             console.log("utterThis is undefined");
             test();
           }
           utterThis = undefined;
-
-          //test();
-
-          // if (utterThis != undefined) {
-          //   utterThis.onend = function (){
-          //     console.log("finished speaking");
-          //     console.log("on test() end");
-          //     test();
-          //   }
-          //   console.log("utterThis is defined");
-          //   utterThis = null;
-          //   test();
-          // }else{
-          //   console.log("on end else");
-          //   test();
-          // }
 
           if (isHome == false || isHome == undefined) {
             document.getElementById("responds").innerHTML = "Systemet er ikke aktiveret";
@@ -505,42 +601,9 @@
           } 
           
         }
-        
-        // if (isHome == true && ) {
-          
-        // }
-        
-
+               
       }
 
-
-      // function checkTrigWord(speech, trigWordArray, utterance) {
-      //   var istriggered = false;
-      //   trigWordArray.forEach(function(element) {
-      //     if (speech.includes(element)) {
-      //       recognition.stop();
-      //       populateVoiceList();
-      //       utterThis = new SpeechSynthesisUtterance(utterance);
-      //       utterThis.voice = voices[index];
-      //       synth.speak(utterThis);
-      //       document.getElementById("responds").innerHTML = utterance;
-      //       //delay 
-
-      //       istriggered = true;
-
-      //       //log successful speech in DB
-      //       var currentDate = new Date();
-      //       var dateAndTime = currentDate.getFullYear()+'-'+(currentDate.getMonth()+1)+'-'+currentDate.getDate()+' '+currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
-      //       db.ref(document.getElementById('chosenTablet').value + '/successSpeech/' + dateAndTime).set({
-      //         input: speech,
-      //         triggerWord: element
-      //       });
-      //       // speechIndex ++;
-      //     }
-          
-      //   })
-      //   return istriggered;
-      // }
 
       function populateVoiceList() {
         if(typeof speechSynthesis === 'undefined') {
@@ -566,13 +629,10 @@
         }
       }
 
-
       
       if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = populateVoiceList;
       }
-      
-
       
 
     </script>
