@@ -159,7 +159,7 @@
 
           }
 
-          trigWordArrayInital = [' frugtskål ', 'frugtskål,', 'frugtskål.']
+          trigWordArrayInital = ['frugtskål ', 'frugtskål,', 'frugtskål.']
           if(isHome && (tree1Ongoing == false || tree1Ongoing == undefined) && checkTrigWord(speechResult, trigWordArrayInital, "hvad kan jeg gøre for dig?")){
             tree1Ongoing = true;
           } 
@@ -171,7 +171,7 @@
           }
           
 
-          console.log("trigger is: " + trigger);
+          console.log("trigger is: " + tree1Ongoing);
           trigWordArrayBuy = [' køb']
           trigWordArrayTake = [ ' tog', ' tage', ' spis']
           trigWordArrayNG = ['ny', 'gammel', "gamle"]
@@ -373,7 +373,7 @@
           // mangler trigger "ikke i tree 2" => Tree 1 og 2 må ikke køre på samme tid
           if (isHome && tree1Ongoing) { 
             //tree1Ongoing = true;
-            console.log(isHome);
+            console.log("isHome: ", isHome);
             document.getElementById("responds").style.color = "white";
             //document.getElementById("responds").innerHTML = "";
             var numOfFruits = speechResult.match(/ en | et | én | to | tre | fire | fem | seks | syv | otte | ni | ti |\d+/g);
@@ -833,7 +833,7 @@
 
         
         function checkFlag() {
-          if(finishedSpeaking === false) {
+          if(finishedSpeaking == false) {
             window.setTimeout(checkFlag, 100); /* this checks the flag every 100 milliseconds*/
           } else {
             finishedSpeaking = false;
@@ -845,7 +845,7 @@
         recognition.onend = function (){
           //console.log(utterThis);
           console.log("inside onend now");
-          console.log(utterThis, isHome);
+          console.log("utterThis: ", utterThis," IsHome: ", isHome);
           console.log("finishedSpeaking: ", finishedSpeaking);
           
           checkFlag();
