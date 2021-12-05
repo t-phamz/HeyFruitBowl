@@ -80,6 +80,7 @@
       var isHome = false;
       var finishedSpeaking = false;
       var hasOldAndNew;
+      var tree2ManglerSvar = false;
 
 
       //document.body.addEventListener("touchend", isHomeOrNot());
@@ -142,9 +143,10 @@
           }
 
           trigWordArrayInital = ['tak', 'Tak']
-          if(checkTrigWord(speechResult, trigWordArrayInital, "hvad kan jeg gøre for dig?")){
-            trigger = true;
-          }
+          // if(checkTrigWord(speechResult, trigWordArrayInital, "hvad kan jeg gøre for dig?")){
+          //   trigger = true;
+          // }
+
           console.log("trigger is: " + trigger);
           trigWordArrayBuy = [' køb']
           trigWordArrayTake = [ ' tog', ' tage', ' spis']
@@ -154,8 +156,15 @@
          
           
           //tree 2 trigger = ishome, setinterval....
-          if (isHome) {
-            setInterval(() => {
+          
+          if (isHome && tree2ManglerSvar == false) {
+            tree2ManglerSvar = true;
+            var moreThanOne;
+            var minDateFruit;
+            var minDateFruits =[]
+            var minDate;
+
+            setTimeout(() => {
               
               //step 1: get data fra DB, tjek hvilken frugt er mest tæt på expired date
               var closestExpiryDate;
@@ -193,63 +202,187 @@
               
               // for at få array ud, brug settimeout (...,500), se linje 400 til 420
               setTimeout(() => {
-                var minDate;
-                var minDateFruit;
-                Object.keys(datoArr).forEach(element => {
-                  //console.log(element, datoArr[element]);
-                  if (minDate == null) {
-                    minDate = datoArr[element];
-                    minDateFruit = element;
-                  }else if (minDate > datoArr[element]) {
-                    minDate = datoArr[element];
-                    minDateFruit = element;
-                  }
+                // var minDate;
+                // var minDateFruit;
+
+                //sorting DatoArr
+                var sortableArr = [];
+                for (var fruit in datoArr) {
+                  sortableArr.push([fruit, datoArr[fruit]]);
+                }
+                sortableArr.sort(function(a, b) {
+                  return new Date(a[1]) - new Date(b[1]);
                 });
-                console.log(minDateFruit,": ", minDate);
+                
+                var sortedDatoArr = {}
+                sortableArr.forEach(function(item){
+                  sortedDatoArr[item[0]]=item[1] 
+                })
+
                 
                 //step 2: vis frugt emoji og få den til at snakke
-                  //2-1: vis frugt emoji 
-                var minDateFruitEmoji;
-                var fruitEmoji = {'æbl': '🍎','banan': '🍌','pær': '🍐', 'appelsin': "<img src='https://cdn.pixabay.com/photo/2016/02/23/17/42/orange-1218158_1280.png' height='45' width='45'>", 'vindru': '🍇', 'mandarin': '🍊', 'fersken': '🍑', 'blomm': "<img src='https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png' height='45' width='45'>"};
-                for (let i = 0; i < Object.keys(fruitEmoji).length; i++) {
-                  
-                  if (Object.keys(fruitEmoji)[i] == minDateFruit) {
-                    minDateFruitEmoji = fruitEmoji[Object.keys(fruitEmoji)[i]];
+                //tjek om der er en eller flere frugt døer samme dag
+                if (sortedDatoArr[Object.keys(sortedDatoArr)[0]] == sortedDatoArr[Object.keys(sortedDatoArr)[1]]) {
+                  moreThanOne = true;
+                }else{
+                  moreThanOne = false;
+                }
+                
+                var fruitEmoji = {'æbl': '🍎','banan': '🍌','pær': '🍐', 'appelsin': "<img src='https://cdn.pixabay.com/photo/2016/02/23/17/42/orange-1218158_1280.png' height='140' width='140'>", 'vindru': '🍇', 'mandarin': '🍊', 'fersken': '🍑', 'blomm': "<img src='https://brands-a.production.onewp.net/app/uploads/sites/95/2020/10/blomme-300x240.png' height='130' width='150'>"};
+                
+                //senario1: kun en frugt er ved at dø 
+                if (moreThanOne == false) {
+                  var minDateFruitEmoji;
+                  // var minDateFruit;
+                  // var minDate;
+                  //get first obj in sortedDatoArr
+                  for (var item in sortedDatoArr){
+                    minDateFruit = item;
+                    minDate = sortedDatoArr[item];
+                    break;
                   }
-                }
-                console.log(minDateFruitEmoji);
-                document.getElementById("frugtSnak").innerHTML = "<p>" + minDateFruitEmoji + '💬 ' + "</p>";
-                
-                var currentDate = new Date;
-                var timeToDeath = new Date(minDate).getDate() - currentDate.getDate();
-                console.log("timeToDeath: ", timeToDeath);
-                
-                //2-2: utterance
-                
-                var utterance = "jeg er mister " + minDateFruit + " og jeg er ved at blive for gammel vil du ikke spise mig før jeg dør om " + timeToDeath + " dage"; 
-                utterThis = new SpeechSynthesisUtterance(utterance);
-                utterThis.voice = voices[index];
-                utterThis.rate = 0.8;
-                synth.speak(utterThis);
-                document.getElementById("responds").innerHTML = utterance;
-                utterThis.onend = function(){
-                  finishedSpeaking = true;
+
+                  for (let i = 0; i < Object.keys(fruitEmoji).length; i++) {
+                    if (Object.keys(fruitEmoji)[i] == minDateFruit) {
+                      minDateFruitEmoji = fruitEmoji[Object.keys(fruitEmoji)[i]];
+                    }
+                  }
+
+                  document.getElementById("frugtSnak").innerHTML = "<p>" + minDateFruitEmoji + '💬 ' + "</p>";
+                  
+                  var currentDate = new Date;
+                  var timeToDeath = new Date(minDate).getDate() - currentDate.getDate();
+                  console.log("timeToDeath: ", timeToDeath);
+                  
+                  //2-2: utterance
+                  var utterance;
+                  if (timeToDeath == 0) {
+                    utterance = "Jeg er mister " + minDateFruit + " og jeg er ved at blive for gammel, vil du ikke spise mig før jeg dør idag?";
+                  } else if (timeToDeath > 0) {
+                    utterance = "Jeg er mister " + minDateFruit + " og jeg er ved at blive for gammel, vil du ikke spise mig før jeg dør om " + timeToDeath + " dage?"; 
+                  }
+                  utterThis = new SpeechSynthesisUtterance(utterance);
+                  utterThis.voice = voices[index];
+                  utterThis.rate = 0.8;
+                  synth.speak(utterThis);
+                  document.getElementById("responds").innerHTML = utterance;
                   utterThis.rate = 1;
-                  console.log("UtterThis tree 2");
-                  // console.log("ind i taget function, both new and old", finishedSpeaking);
-                  // console.log("trigwordarray utterthis: ", utterThis);
+                  utterThis.onend = function(){
+                    finishedSpeaking = true;
+                    //utterThis.rate = 1;
+                    //console.log("UtterThis tree 2");
+                  }
+                  // tree2ManglerSvar = true;
+
+                  var trigWordArrJa = [" ja ", " jo "]
+                  var trigWordArrNej = [" nej", " ellers tak"]
+                  
+
                 }
+                //senario2: mere end en frugt er ved at døde
+                else if (moreThanOne == true) {
+                  var minDateFruitEmojis =[]
+                  //var minDateFruits =[]
+                  //var minDate = sortedDatoArr[Object.keys(sortedDatoArr)[0]];
+                  
+                  //get frugter der dø de samme date
+                  var num = 0;
+                  for (var item in sortedDatoArr){
+                    if (sortedDatoArr[item] == minDate) {
+                      minDateFruits[num] = item;
+                      num++;
+                    } else {
+                      break;
+                    }
+                  }
+
+                  for (let i = 0, j = 0; i < Object.keys(fruitEmoji).length; i++) {
+                    //loop igennem alle emoji
+                    minDateFruits.forEach(element => {
+                      if (Object.keys(fruitEmoji)[i] == element) {
+                        minDateFruitEmojis[j] = fruitEmoji[Object.keys(fruitEmoji)[i]];
+                        j++;
+                      }
+                    });
+                  }
+
+                  //vis emojis
+                  var ShowFruitEmojis = "";
+                  minDateFruitEmojis.forEach(element => {
+                    ShowFruitEmojis += element;
+                  });
+
+                  document.getElementById("frugtSnak").innerHTML = "<p>" + ShowFruitEmojis + '💬 ' + "</p>";
+                  
+                  var currentDate = new Date;
+                  var timeToDeath = new Date(minDate).getDate() - currentDate.getDate();
+                  console.log("timeToDeath: ", timeToDeath);
+
+                  //frugter snakker
+                  var utterance;
+                  if (timeToDeath == 0) {
+                    utterance = "Vi er ved at blive for gamle, vil du ikke spise os før vi dør idag?";
+                  } else if (timeToDeath > 0) {
+                    utterance = "Vi er ved at blive for gamle, vil du ikke spise os før vi dør om " + timeToDeath + " dage?"; 
+                  }
+                  utterThis = new SpeechSynthesisUtterance(utterance);
+                  utterThis.voice = voices[index];
+                  utterThis.rate = 0.7;
+                  synth.speak(utterThis);
+                  document.getElementById("responds").innerHTML = utterance;
+                  utterThis.onend = function(){
+                    finishedSpeaking = true;
+                    utterThis.rate = 1;
+                    //console.log("UtterThis tree 2");
+                  }
+
+
+                  //hvis svar ja: sporge hvilken frugt 
+                 
+                }
+
+                
+                //hvis svar nej: sporge igen senere, skifte max og min ind i setinterval
 
               }, 1000)
               
+              
                
-            }, Math.random() * (300000 - 60000) + 60000);
-          //Math.random() * (7200000 - 3600000) + 3600000)
+            }, 10000);//Math.random() * (5000 - 2000) + 2000);
+            //Math.random() * (7200000 - 3600000) + 3600000)
+
+            // 
+            // //hvis ja: 
+            // if (tree2ManglerSvar == true && moreThanOne == false && checkTrigWord(speechResult, trigWordArrJa, "okay")){
+            //   console.log("tree2ManglerSvar is true");
+            //   tree2ManglerSvar = false;
+            //   //database stuff (update frugt -1)
+
+            //   db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + minDateFruit).get().then((snapshot) => {
+            //     var currentAntal;         
+            //     snapshot.forEach(function(frugtSnapshot) {
+            //       var date = frugtSnapshot.val();
+            //       currentAntal = parseInt(date.antal);
+            //     });
+                
+            //     db.ref(document.getElementById('chosenTablet').value + '/frugter/' + minDateFruit + "/" + minDate).update({
+            //       antal: currentAntal - 1,
+            //     });
+
+            //     if (currentAntal <= 1) {
+            //       db.ref(document.getElementById('chosenTablet').value + '/frugter/' + minDateFruit + "/" + minDate).remove();
+            //     }
+
+            //   });
+
+            // }
+
+            //tree 2 slutter her
           }
 
           //Tree 1 trigger = ishome + "hey frugtskaal"
           // mangler trigger "ikke i tree 2" => Tree 1 og 2 må ikke køre på samme tid
-          if (isHome) { 
+          if (tree2ManglerSvar == false && isHome) { 
             console.log(isHome);
             document.getElementById("responds").style.color = "white";
             document.getElementById("responds").innerHTML = "";
@@ -449,6 +582,9 @@
                 finishedSpeaking = true;
               }
             }
+            // else if (tree2ManglerSvar == true ) {
+              
+            // }
 
             noAnswer = true;
             //console.log("HasTwoDate should be true: " + hasTwoDate);
@@ -628,7 +764,8 @@
           } 
           
         }
-               
+        
+        //test() slutter
       }
 
 
