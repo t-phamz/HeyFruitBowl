@@ -373,7 +373,7 @@
           // mangler trigger "ikke i tree 2" => Tree 1 og 2 må ikke køre på samme tid
           if (isHome && tree1Ongoing) { 
             //tree1Ongoing = true;
-            console.log("inde i tree 1 isHome: ", isHome, " tree1Ongoing: ", tree1Ongoing);
+            console.log("inde i tree 1 isHome: ", isHome, " tree1Ongoing: ", tree1Ongoing, "tree2manglersvar: ", tree2ManglerSvar);
             document.getElementById("responds").style.color = "white";
             //document.getElementById("responds").innerHTML = "";
             var numOfFruits = speechResult.match(/ en | et | én | to | tre | fire | fem | seks | syv | otte | ni | ti |\d+/g);
