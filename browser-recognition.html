@@ -159,7 +159,7 @@
 
           }
 
-          trigWordArrayInital = ['frugtskål ', 'frugtskål,', 'frugtskål.', 'frugtskåle ']
+          trigWordArrayInital = ['frugtskål']
           if(isHome && (tree1Ongoing == false || tree1Ongoing == undefined) && checkTrigWord(speechResult, trigWordArrayInital, "hvad kan jeg gøre for dig?")){
             tree1Ongoing = true;
           } 
@@ -420,7 +420,7 @@
             
             
             if (fruits != undefined && numOfFruits != undefined && tree2ManglerSvar == false && checkTrigWord(speechResult, trigWordArrayBuy, "Okay, det er noteret")){
-
+              console.log("buy was success");
               var expiryDateArr = {'æbl': 5,'banan': 3,'pær': 3, 'appelsin': 5, 'vindru': 3, 'mandarin': 5, 'fersken': 2, 'blomm': 3};
               //set in i DB
               for (let i = 0; i < fruits.length; i++) {
