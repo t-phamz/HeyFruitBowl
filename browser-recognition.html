@@ -115,7 +115,7 @@
         var theCurrentDateDay = theCurrentDate.getDate();
 
         if (tempDate != theCurrentDateDay) {
-          tree2ManglerSvar == false; //dvs. tree 2 blive trigged
+          tree2ManglerSvar = false; //dvs. tree 2 blive trigged
           console.log("tree2ManglerSvar er set til false");
           tempDate = theCurrentDateDay;
         }
@@ -172,7 +172,7 @@
           
 
           console.log("trigger is: " + tree1Ongoing);
-          trigWordArrayBuy = [' køb']
+          trigWordArrayBuy = [' køb ', ' købt ']
           trigWordArrayTake = [ ' tog', ' tage', ' spis']
           trigWordArrayNG = ['ny', 'gammel', "gamle"]
           trigWordArrayWhat = ["hvad har jeg", "hvad er der"]
@@ -417,8 +417,9 @@
             console.log("number: ", numOfFruits, typeof numOfFruits);
             console.log("fruits: ", fruits);
             // console.log("du har købt: " + numOfFruits[0] + " " + fruits[0]);
+            console.log("ligefør buy ", fruits != undefined, numOfFruits != undefined, tree2ManglerSvar == false);
+            console.log("speechResult: ", speechResult, "does it include buy: ", speechResult.includes("køb"));
             
-            console.log(fruits != undefined, numOfFruits != undefined, tree2ManglerSvar == false);
             if (fruits != undefined && numOfFruits != undefined && tree2ManglerSvar == false && checkTrigWord(speechResult, trigWordArrayBuy, "Okay, det er noteret")){
               console.log("buy was success");
               var expiryDateArr = {'æbl': 5,'banan': 3,'pær': 3, 'appelsin': 5, 'vindru': 3, 'mandarin': 5, 'fersken': 2, 'blomm': 3};
@@ -477,7 +478,7 @@
                     hasTwoDate = true;
                     chosenFruit = fruits;
                     chosenNum = numOfFruits;
-                    tree1Ongoing = false;
+                    //tree1Ongoing = false;
                   }else{
                     var utterance = "Okay, tak";
                     utterThis = new SpeechSynthesisUtterance("Okay, det er noteret");
