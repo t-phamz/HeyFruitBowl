@@ -165,6 +165,7 @@
           } 
 
           if (tree1Ongoing == undefined || tree1Ongoing == false) {
+            document.getElementById("responds").style.color = "white";
             document.getElementById("responds").innerHTML = "Du mangler at aktivere mig ved at sige frugtskål";
             document.getElementById("frugtSnak").innerHTML = "";
           }
@@ -565,7 +566,7 @@
 
               hasTwoDate = false;  
               noAnswer = false;
-              tree1ongoing = false;
+              tree1Ongoing = false;
             } 
 
             if (tree2ManglerSvar == false && hasTwoDate && noAnswer) {
