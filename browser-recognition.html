@@ -16,7 +16,7 @@
     </header> -->
     <main>
       <select id="voiceSelect" style="display: none;"></select>
-      <h1 id="homeHeader"> Tryk på skærmen for at snakke med frugtskålen</h1>
+      <h1 id="homeHeader"> Tryk på skærmen for at snakke med Sara</h1>
       <div id="result">
       </div>
       <p id="responds"></p>
@@ -75,7 +75,7 @@
       var trigger;
       var hasTwoDate = false;
       var noAnswer;
-      var noAnswerTree2;
+      var noAnswerTree2 = false;
       var chosenFruit;
       var chosenNum;
       var isHome = false;
@@ -88,6 +88,7 @@
       var minDateFruits =[]
       var minDate;
       var tree1Ongoing;
+      var updateFrugtUI = true;
 
       
 
@@ -102,7 +103,7 @@
           document.getElementById("homeHeader").innerHTML = "Systemet er aktivt";
           document.getElementById("homeHeader").style.color = "green";
         } else  {
-          document.getElementById("homeHeader").innerHTML = "Tryk på skærmen for at snakke med frugtskålen";
+          document.getElementById("homeHeader").innerHTML = "Tryk på skærmen for at snakke med Sara";
           document.getElementById("homeHeader").style.color = "grey";
         }
       }
@@ -159,14 +160,15 @@
 
           }
 
-          trigWordArrayInital = ['frugtskål']
+          trigWordArrayInital = ['sara']
+          // ['frugtskål']
           if(isHome && (tree1Ongoing == false || tree1Ongoing == undefined) && checkTrigWord(speechResult, trigWordArrayInital, "hvad kan jeg gøre for dig?")){
             tree1Ongoing = true;
           } 
 
           if (tree1Ongoing == undefined || tree1Ongoing == false) {
             document.getElementById("responds").style.color = "white";
-            document.getElementById("responds").innerHTML = "Du mangler at aktivere mig ved at sige frugtskål";
+            document.getElementById("responds").innerHTML = "Du mangler at aktivere mig ved at sige Sara";
             document.getElementById("frugtSnak").innerHTML = "";
           }
           
@@ -177,15 +179,18 @@
           trigWordArrayNG = ['ny', 'gammel', "gamle"]
           trigWordArrayWhat = ["hvad har jeg", "hvad er der"]
           trigWordArrayJa = ["ja,", "ja." , "jo,", "jo.", " ja ", " jo ", "ja "]
-          trigWordArrayNej = ["nej,","nej.", " nej ", " ellers tak"]
+          trigWordArrayNej = ["nej,","nej.", " nej ", "ellers tak"]
 
 
           //tree 2 trigger = ishome, setinterval....
           
           if (isHome && tree2ManglerSvar == false && tree1Ongoing == false) {
             tree2ManglerSvar = true;
+            console.log("tree 2 starter");
 
             setTimeout(() => {
+
+              console.log("tree 2 settimeout");
               
               //step 1: get data fra DB, tjek hvilken frugt er mest tæt på expired date
               var closestExpiryDate;
@@ -275,9 +280,12 @@
                   //2-2: utterance
                   var utterance;
                   if (timeToDeath == 0) {
-                    utterance = "Jeg er mister " + minDateFruit + " og jeg er ved at blive for gammel, vil du ikke spise mig før jeg dør idag";
+                    utterance = "Jeg er frøken " + minDateFruit + " og jeg er ved at blive for gammel, vil du ikke spise mig før jeg dør idag";
                   } else if (timeToDeath > 0) {
-                    utterance = "Jeg er mister " + minDateFruit + " og jeg er ved at blive for gammel, vil du ikke spise mig før jeg dør om " + timeToDeath + " dage"; 
+                    utterance = "Jeg er frøken " + minDateFruit + " og jeg er ved at blive for gammel, vil du ikke spise mig før jeg dør om " + timeToDeath + " dage"; 
+                  }else if (timeToDeath < 0) {
+                    var dage = timeToDeath * -1;
+                    utterance = "Jeg er frøken " + minDateFruit + " og jeg er tæt på at dø, jeg døde måske for " + dage + " dage siden, spis mig hvis jeg stadig er god";
                   }
                   utterThis = new SpeechSynthesisUtterance(utterance);
                   utterThis.voice = voices[index];
@@ -339,7 +347,11 @@
                     utterance = "Vi er ved at blive for gamle, vil du ikke spise os før vi dør idag";
                   } else if (timeToDeath > 0) {
                     utterance = "Vi er ved at blive for gamle, vil du ikke spise os før vi dør om " + timeToDeath + " dage"; 
+                  }else if (timeToDeath < 0) {
+                    var dage = timeToDeath * -1;
+                    utterance = "Vi er tæt på at dø, vi døde måske for " + dage + " dage siden, spis en af os hvis en af os stadig er ";
                   }
+
                   utterThis = new SpeechSynthesisUtterance(utterance);
                   utterThis.voice = voices[index];
                   utterThis.rate = 0.7;
@@ -364,7 +376,8 @@
               
               
                
-            }, Math.random() * (7200000 - 3600000) + 3600000);
+            }, 1000);
+            //Math.random() * (7200000 - 3600000) + 3600000);
 
             //tree 2 slutter her
           }
@@ -373,7 +386,7 @@
           // mangler trigger "ikke i tree 2" => Tree 1 og 2 må ikke køre på samme tid
           if (isHome && tree1Ongoing) { 
             //tree1Ongoing = true;
-            console.log("inde i tree 1 isHome: ", isHome, " tree1Ongoing: ", tree1Ongoing, "tree2manglersvar: ", tree2ManglerSvar);
+            //console.log("inde i tree 1 isHome: ", isHome, " tree1Ongoing: ", tree1Ongoing, "tree2manglersvar: ", tree2ManglerSvar);
             document.getElementById("responds").style.color = "white";
             //document.getElementById("responds").innerHTML = "";
             var numOfFruits = speechResult.match(/ en | et | én | to | tre | fire | fem | seks | syv | otte | ni | ti |\d+/g);
@@ -417,10 +430,10 @@
             console.log("number: ", numOfFruits, typeof numOfFruits);
             console.log("fruits: ", fruits);
             // console.log("du har købt: " + numOfFruits[0] + " " + fruits[0]);
-            console.log("ligefør buy ", fruits != undefined, numOfFruits != undefined, tree2ManglerSvar == false);
+            console.log("ligefør buy ", fruits != undefined, numOfFruits != undefined, "noAnswerTree2 burde være true: ", noAnswerTree2 == false);
             console.log("speechResult: ", speechResult, "does it include buy: ", speechResult.includes("køb"));
             
-            if (fruits != undefined && numOfFruits != undefined && tree2ManglerSvar == false && checkTrigWord(speechResult, trigWordArrayBuy, "Okay, det er noteret")){
+            if (fruits != undefined && numOfFruits != undefined && noAnswerTree2 == false && checkTrigWord(speechResult, trigWordArrayBuy, "Okay, det er noteret")){
               console.log("buy was success");
               var expiryDateArr = {'æbl': 5,'banan': 3,'pær': 3, 'appelsin': 5, 'vindru': 3, 'mandarin': 5, 'fersken': 2, 'blomm': 3};
               //set in i DB
@@ -446,25 +459,26 @@
               }
 
               tree1Ongoing = false;
+              updateFrugtUI = true;
 
-            } else if (fruits != undefined && tree2ManglerSvar == false && checkTrigWord(speechResult, trigWordArrayBuy, "Jeg hørte ikke hvor mange frugter, prøv igen")) {
+            } else if (fruits != undefined && noAnswerTree2 == false && checkTrigWord(speechResult, trigWordArrayBuy, "Jeg hørte ikke hvor mange frugter, prøv igen")) {
               
-            } else if (numOfFruits != undefined && tree2ManglerSvar == false && checkTrigWord(speechResult, trigWordArrayBuy, "Jeg hørte ikke hvilken frugter du købte, prøv igen")) {
+            } else if (numOfFruits != undefined && noAnswerTree2 == false && checkTrigWord(speechResult, trigWordArrayBuy, "Jeg hørte ikke hvilken frugter du købte, prøv igen")) {
 
-            } else if (tree2ManglerSvar == false && checkTrigWord(speechResult, trigWordArrayBuy, "Undskyld jeg hørte dig ikke ordentligt, prøv igen")) {
+            } else if (noAnswerTree2 == false && checkTrigWord(speechResult, trigWordArrayBuy, "Undskyld jeg hørte dig ikke ordentligt, prøv igen")) {
               
             }
 
             
 
-            if (fruits != undefined && numOfFruits != undefined && tree2ManglerSvar == false && checkTrigWordTake(speechResult, trigWordArrayTake) && hasTwoDate == false) {
+            if (fruits != undefined && numOfFruits != undefined && noAnswerTree2 == false && hasTwoDate == false && checkTrigWordTake(speechResult, trigWordArrayTake)) {
 
               for (let i = 0; i < fruits.length; i++) {
                 hasTwoDate = false;
                 utterThis = 1;
                 db.ref().child(document.getElementById('chosenTablet').value + "/frugter/" + fruits[i]).get().then((snapshot) => {
                   if (Object.keys(snapshot.val()).length > 1){
-                    var utterance = "Har du taget en af de gamle " + fruits[i] + "er eller en af de nye " + fruits[i] + "er";
+                    var utterance = "Har du taget  af de gamle " + fruits[i] + "er eller  af de nye " + fruits[i] + "er";
                     utterThis = new SpeechSynthesisUtterance(utterance);
                     utterThis.voice = voices[index];
                     synth.speak(utterThis);
@@ -506,19 +520,20 @@
                       db.ref(document.getElementById('chosenTablet').value + '/frugter/' + fruits[i] + "/" + Object.keys(snapshot.val())).remove();
                     }
                     tree1Ongoing = false;
+                    updateFrugtUI = true;
                   }
                 });
               }
-            } else if (tree2ManglerSvar == false && fruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, "Jeg hørte ikke hvor mange frugter du tog, prøv igen") && hasTwoDate == false) {
+            } else if (noAnswerTree2 == false && fruits != undefined && hasTwoDate == false && checkTrigWord(speechResult, trigWordArrayTake, "Jeg hørte ikke hvor mange frugter du tog, prøv igen")) {
               
-            } else if (tree2ManglerSvar == false && numOfFruits != undefined && checkTrigWord(speechResult, trigWordArrayTake, "Jeg hørte ikke hvilke frugter du tog, prøv igen") && hasTwoDate == false) {
+            } else if (noAnswerTree2 == false && numOfFruits != undefined && hasTwoDate == false && checkTrigWord(speechResult, trigWordArrayTake, "Jeg hørte ikke hvilke frugter du tog, prøv igen")) {
               
-            } else if(tree2ManglerSvar == false && checkTrigWord(speechResult, trigWordArrayTake, "Undskyld jeg hørte dig ikke ordentligt, prøv igen")) {
+            } else if(noAnswerTree2 == false && hasTwoDate == false && checkTrigWord(speechResult, trigWordArrayTake, "Undskyld jeg hørte dig ikke ordentligt, prøv igen")) {
 
             }
 
 
-            if (tree2ManglerSvar == false && hasTwoDate && checkTrigWord(speechResult, trigWordArrayNG, "okay, tak")) {
+            if (noAnswerTree2 == false && hasTwoDate && checkTrigWord(speechResult, trigWordArrayNG, "okay, tak")) {
               //console.log("ny eller gammel?");
               var nyDate;
               var gamleDate;
@@ -561,6 +576,7 @@
                       }
                     });
                   }
+
                 });
                 
               }
@@ -568,9 +584,10 @@
               hasTwoDate = false;  
               noAnswer = false;
               tree1Ongoing = false;
+              updateFrugtUI = true;
             } 
 
-            if (tree2ManglerSvar == false && hasTwoDate && noAnswer) {
+            if (noAnswerTree2 == false && hasTwoDate && noAnswer) {
               var utterance = "Du mangler at svare om det er den nye eller den gamle som er blevet taget";
               utterThis = new SpeechSynthesisUtterance(utterance);
               utterThis.voice = voices[index];
@@ -614,6 +631,7 @@
                 invalidAnswerTree2 = false;
                 noAnswerTree2 = false;
                 tree1Ongoing = false;
+                updateFrugtUI = true;
                }
                //2. >1 frugt + ja(hvilken frugt) - set invalidAnswerTree2 = false
                else if (moreThanOne == true && fruits != null && checkTrigWord(speechResult, trigWordArrayJa, "Tak for at redde mig fra døden, du er min helt")){
@@ -640,6 +658,7 @@
                 invalidAnswerTree2 = false;
                 noAnswerTree2 = false;
                 tree1Ongoing = false;
+                updateFrugtUI = true;
                 
                } else if (moreThanOne == true && fruits == null && checkTrigWord(speechResult, trigWordArrayJa, "Jeg hørte ikke hvilken frugt du tog, prøv igen")) {
                  
@@ -690,7 +709,7 @@
             //slutning af tree 1
           }
 
-          setInterval(() => {
+          if (updateFrugtUI == true) {
             var fruitWithNum = []
               db.ref().child(document.getElementById('chosenTablet').value + "/frugter").get().then((snapshot) => {
                 //snapshot of each fruit
@@ -752,10 +771,11 @@
                   
                 }
 
-              }, 500)
+              }, 500);
 
-          }, 1000);
-
+              updateFrugtUI = false;
+          }
+          
           function checkTrigWord(speech, trigWordArray, utterance) {
             var istriggered = false;
             trigWordArray.forEach(function(element) {
