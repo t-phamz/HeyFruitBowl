@@ -179,7 +179,7 @@
           trigWordArrayNG = ['ny', 'gammel', "gamle"]
           trigWordArrayWhat = ["hvad har jeg", "hvad er der"]
           trigWordArrayJa = ["ja,", "ja." , "jo,", "jo.", " ja ", " jo ", "ja "]
-          trigWordArrayNej = ["nej,","nej.", " nej ", "ellers tak"]
+          trigWordArrayNej = ["nej", "ellers tak"]
 
 
           //tree 2 trigger = ishome, setinterval....
@@ -289,10 +289,10 @@
                   }
                   utterThis = new SpeechSynthesisUtterance(utterance);
                   utterThis.voice = voices[index];
-                  utterThis.rate = 0.8;
+                  //utterThis.rate = 0.8;
                   synth.speak(utterThis);
                   document.getElementById("responds").innerHTML = utterance;
-                  utterThis.rate = 1;
+                  //utterThis.rate = 1;
                   utterThis.onend = function(){
                     finishedSpeaking = true;
                     //utterThis.rate = 1;
@@ -354,12 +354,12 @@
 
                   utterThis = new SpeechSynthesisUtterance(utterance);
                   utterThis.voice = voices[index];
-                  utterThis.rate = 0.7;
+                  //utterThis.rate = 0.7;
                   synth.speak(utterThis);
                   document.getElementById("responds").innerHTML = utterance;
                   utterThis.onend = function(){
                     finishedSpeaking = true;
-                    utterThis.rate = 1;
+                    //utterThis.rate = 1;
                     //console.log("UtterThis tree 2");
                   }
 
@@ -664,7 +664,7 @@
                  
                } 
                //3. nej - set invalidAnswerTree2 = false
-               else if (checkTrigWord(speechResult, trigWordArrayNej, "Jamen så ligger jeg bare her og dør")) {
+               else if (moreThanOne == false && checkTrigWord(speechResult, trigWordArrayNej, "Jamen så ligger jeg bare her og dør")) {
                 //fjerne emoji 
                 setTimeout(() => {
                   document.getElementById("frugtSnak").innerHTML = "";
@@ -677,6 +677,20 @@
                 invalidAnswerTree2 = false;
                 noAnswerTree2 = false;
                 tree1Ongoing = false;
+               }else if (moreThanOne == true && checkTrigWord(speechResult, trigWordArrayNej, "Jamen så ligger vi bare her og dør")) {
+                 //fjerne emoji 
+                setTimeout(() => {
+                  document.getElementById("frugtSnak").innerHTML = "";
+                  document.getElementById("responds").innerHTML = "";
+                }, 3000);                
+                
+                //reset tree2 med ny tid i settimeout
+                tree2ManglerSvar = false;
+
+                invalidAnswerTree2 = false;
+                noAnswerTree2 = false;
+                tree1Ongoing = false;
+                 
                }
                //4. invalid svar invalidAnswerTree2 = T
                 //4.1 morethanone T
@@ -885,6 +899,7 @@
         }
         
         //test() slutter
+        updateFrugtUI = true;
       }
 
 
