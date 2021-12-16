@@ -117,7 +117,7 @@
 
         if (tempDate != theCurrentDateDay) {
           tree2ManglerSvar = false; //dvs. tree 2 blive trigged
-          console.log("tree2ManglerSvar er set til false");
+          //console.log("tree2ManglerSvar er set til false");
           tempDate = theCurrentDateDay;
         }
 
@@ -182,15 +182,83 @@
           trigWordArrayNej = ["nej", "ellers tak"]
 
 
+            db.ref().child(document.getElementById('chosenTablet').value + "/successSpeech").get().then((snapshot) => {
+              setTimeout(() => {
+
+                // console.log(Object.keys(snapshot.val()));
+                // console.log(Object.values(snapshot.val()));
+                // console.log(snapshot.val());
+                //console.log(snapshot.val());
+
+                var saraTal = 0;
+                var spisTal = 0;
+                var købTal = 0;
+                var nejTal = 0;
+                var gammelTal = 0;
+                var nyTal = 0;
+                
+                var test = snapshot.val();
+                resultArr = {}
+                console.log(Object.values(test).length);
+
+
+                for (let k = 0; k < Object.values(test).length; k++) {
+                  //Object.keys(test)[i].triggerWord
+                  //console.log((Object.keys(test)[k]));
+                  console.log(test[(Object.keys(test)[k])].triggerWord);
+                  if (test[(Object.keys(test)[k])].triggerWord.includes("sara") || test[(Object.keys(test)[k])].triggerWord.includes("zara")) {
+                    saraTal++;
+                  }else if (test[(Object.keys(test)[k])].triggerWord.includes("spis") || test[(Object.keys(test)[k])].triggerWord.includes("tag")) {
+                    spisTal++;
+                  }else if (test[(Object.keys(test)[k])].triggerWord.includes("køb")) {
+                    købTal++;
+                  }else if (test[(Object.keys(test)[k])].triggerWord.includes("nej") || test[(Object.keys(test)[k])].triggerWord.includes("ellers tak")  ) {
+                    nejTal++;
+                  }else if (test[(Object.keys(test)[k])].triggerWord.includes("gammel") || test[(Object.keys(test)[k])].triggerWord.includes("gamle")) {
+                    gammelTal++;
+                  }else if (test[(Object.keys(test)[k])].triggerWord.includes("ny")) {
+                    nyTal++;
+                  }
+
+                   
+
+                  if (k == Object.values(test).length-1 ) {
+                    console.log("Sara: ", saraTal, " Spis/tage: ", spisTal, " Køb: ", købTal, " nej: ", nejTal, " gammel: ", gammelTal, " ny: ", nyTal);
+                    console.log("total number of commands: ", Object.values(test).length, " counted commands: ", saraTal+spisTal+købTal+nejTal+gammelTal+nyTal );
+                  }
+
+                  
+                }
+
+                // test.forEach(element => {
+                // });
+                // console.log((test));
+                // console.log(test.triggerWord);
+                
+                console.log("jeg virker ");
+                  // snapshot.forEach(function(trigwords) {
+                  //   var dbResults = trigwords.val();
+                  //   var test = dbResults.triggerWord
+                  //   console.log(test);
+                  // });
+                }, 500);
+              });
+
+              // snapshot.forEach(function(frugtSnapshot) {
+              //         var date = frugtSnapshot.val();
+              //         currentAntal = parseInt(date.antal);
+              //       });
+
+
           //tree 2 trigger = ishome, setinterval....
           
           if (isHome && tree2ManglerSvar == false && tree1Ongoing == false) {
             tree2ManglerSvar = true;
-            console.log("tree 2 starter");
+            //console.log("tree 2 starter");
 
             setTimeout(() => {
 
-              console.log("tree 2 settimeout");
+              //console.log("tree 2 settimeout");
               
               //step 1: get data fra DB, tjek hvilken frugt er mest tæt på expired date
               var closestExpiryDate;
@@ -811,12 +879,12 @@
                 istriggered = true;
 
                 //log successful speech in DB
-                var currentDate = new Date();
-                var dateAndTime = currentDate.getFullYear()+'-'+(currentDate.getMonth()+1)+'-'+currentDate.getDate()+' '+currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
-                db.ref(document.getElementById('chosenTablet').value + '/successSpeech/' + dateAndTime).set({
-                  input: speech,
-                  triggerWord: element
-                });
+                // var currentDate = new Date();
+                // var dateAndTime = currentDate.getFullYear()+'-'+(currentDate.getMonth()+1)+'-'+currentDate.getDate()+' '+currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
+                // db.ref(document.getElementById('chosenTablet').value + '/successSpeech/' + dateAndTime).set({
+                //   input: speech,
+                //   triggerWord: element
+                // });
                 // speechIndex ++;
               }
               
